@@ -51,12 +51,76 @@
   // Коротке повідомлення вгорі екрана
   const toastEl = $('#toast');
   let toastTimer;
-  function toast(text) {
+  // text — повідомлення; action — необовʼязкова кнопка { label, run } (напр. «Повернути»)
+  function toast(text, action) {
     toastEl.textContent = text;
+    toastEl.classList.toggle('has-action', !!action);
+    if (action) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = action.label;
+      btn.addEventListener('click', () => { toastEl.classList.remove('show'); action.run(); }, { once: true });
+      toastEl.append(btn);
+    }
     toastEl.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), action ? 4500 : 2400);
   }
+
+  // --- Анімації (вимикаються, якщо в системі ввімкнено «менше руху») ---
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const screenEl = $('#app');
+  // Масштаб «телефону» на ПК (щоб частинки й свайп рахувались у правильних пікселях)
+  const screenScale = () => screenEl.getBoundingClientRect().width / screenEl.offsetWidth || 1;
+
+  // FLIP: запамʼятовуємо позиції елементів [data-flip], оновлюємо список і плавно «доїжджаємо»
+  function flip(container, update) {
+    const before = new Map();
+    container.querySelectorAll('[data-flip]').forEach((el) => before.set(el.dataset.flip, el.getBoundingClientRect()));
+    update();
+    if (reduceMotion) return;
+    const k = screenScale();
+    container.querySelectorAll('[data-flip]').forEach((el) => {
+      const b = before.get(el.dataset.flip);
+      if (!b) {
+        el.animate([{ opacity: 0, transform: 'scale(.97)' }, { opacity: 1, transform: 'none' }], { duration: 280, easing: 'ease-out' });
+        return;
+      }
+      const a = el.getBoundingClientRect();
+      const dx = (b.left - a.left) / k, dy = (b.top - a.top) / k;
+      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+        el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }],
+                   { duration: 420, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+      }
+    });
+  }
+
+  // Частинки-конфеті з точки елемента. kind: 'joy' — святкові, 'dust' — сірий пил при видаленні
+  const BURST_COLORS = { joy: ['#e2bd73', '#2f9b70', '#7cc1a0', '#f3d79a', '#5b8fc3', '#ecc1a3'],
+                         dust: ['#c9c2b4', '#b5ae9f', '#ddd6c8', '#a59f92'] };
+  function burst(fromEl, kind = 'joy') {
+    if (reduceMotion) return;
+    const k = screenScale();
+    const sr = screenEl.getBoundingClientRect(), r = fromEl.getBoundingClientRect();
+    const x = (r.left + r.width / 2 - sr.left) / k, y = (r.top + r.height / 2 - sr.top) / k;
+    const colors = BURST_COLORS[kind];
+    const count = kind === 'joy' ? 16 : 12;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('i');
+      p.className = 'particle';
+      const size = 4 + Math.random() * 4;
+      p.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${kind === 'joy' && i % 3 === 0 ? size * 1.8 : size}px;background:${colors[i % colors.length]}`;
+      screenEl.append(p);
+      const angle = (kind === 'joy' ? Math.random() * 2 * Math.PI : Math.PI + (Math.random() - 0.5) * 1.6);
+      const dist = (kind === 'joy' ? 28 : 40) + Math.random() * 38;
+      const tx = Math.cos(angle) * dist, ty = Math.sin(angle) * dist + (kind === 'joy' ? 18 : 6);
+      p.animate([
+        { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1 },
+        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(.6) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+      ], { duration: 650 + Math.random() * 250, easing: 'cubic-bezier(.15, .7, .3, 1)' }).onfinish = () => p.remove();
+    }
+  }
+  const haptic = (ms) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) { /* без вібрації */ } };
 
   // Відмінювання: 1 сесія, 2 сесії, 5 сесій
   function plural(n, one, few, many) {
@@ -86,6 +150,7 @@
     }
     next.classList.add('active');
     app.dataset.screen = name;
+    $$('.sheet-wrap').forEach((w) => { w.hidden = true; });   // відкриті шторки не «переїжджають» на інший екран
     document.body.classList.toggle('bg-focus', name === 'focus');  // фон на ПК
     if (name === 'focus') syncFocusChip();
     if (name === 'goals') renderGoals();
@@ -214,15 +279,21 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   // Список справ на обраний день
-  // Картка справи. Справи без часу (start = '') — без колонки з годинами
+  // Картка справи. Справи без часу (start = '') і виконані — без колонки з годинами.
+  // .swipe-bg — червона підкладка, яка відкривається під карткою під час свайпу ліворуч
   function taskItem(t) {
     const flagged = t.cat === 'priority' || t.cat === 'important';
-    const anytime = !t.start;
-    return `<li class="task${anytime ? ' anytime' : ''}${t.done ? ' done' : ''}" data-id="${t.id}">
-      ${anytime ? '' : `<div class="task-time">${t.start}${t.end ? '<br>' + t.end : ''}</div>`}
+    const compact = !t.start || t.done;
+    // У «Виконано» час показуємо в підписі: «06:30 · 30 хв»
+    const sub = t.done && t.start ? [t.start, t.sub].filter(Boolean).join(' · ') : t.sub;
+    return `<li class="task${compact ? ' anytime' : ''}${t.done ? ' done' : ''}" data-id="${t.id}" data-flip="${t.id}">
+      ${compact ? '' : `<div class="task-time">${t.start}${t.end ? '<br>' + t.end : ''}</div>`}
+      <span class="swipe-bg" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>Видалити
+      </span>
       <div class="task-card ${t.cat}" role="button" tabindex="0" data-edit>
-        <div class="t"><b>${esc(t.title)}</b>${t.sub ? `<span class="${flagged ? 'flag' : ''}">${esc(t.sub)}</span>` : ''}</div>
-        <button class="check" data-toggle aria-label="${t.done ? 'Позначити невиконаною' : 'Позначити виконаною'}">
+        <div class="t"><b>${esc(t.title)}</b>${sub ? `<span class="${flagged && !t.done ? 'flag' : ''}">${esc(sub)}</span>` : ''}</div>
+        <button class="check" data-toggle aria-label="${t.done ? 'Повернути в план' : 'Позначити виконаною'}">
           <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
         </button>
       </div>
@@ -231,43 +302,151 @@
 
   function renderTasks() {
     const all = tasksFor(selectedKey);
-    // Без часу: спершу невиконані, у порядку додавання
-    const anytime = all.filter((t) => !t.start).sort((a, b) => a.done - b.done);
-    const timed = all.filter((t) => t.start);
+    const anytime = all.filter((t) => !t.start && !t.done);           // без часу, у порядку додавання
+    const timed = all.filter((t) => t.start && !t.done);              // розклад за часом
+    // Виконано: спершу старі (без мітки часу виконання), далі — у порядку виконання; нові — внизу
+    const done = all.filter((t) => t.done).sort((a, b) => (a.doneAt || 0) - (b.doneAt || 0));
+    const timedTotal = all.filter((t) => t.start).length;
 
-    const left = anytime.filter((t) => !t.done).length;
-    $('#anytimeCount').textContent = anytime.length ? `${left} з ${anytime.length}` : '';
+    $('#anytimeCount').textContent = anytime.length ? String(anytime.length) : '';
     $('#anytimeList').innerHTML = anytime.map(taskItem).join('');
 
-    $('#scheduleCount').textContent = timed.length ? `${timed.filter((t) => !t.done).length} з ${timed.length}` : '';
+    $('#scheduleCount').textContent = timed.length ? String(timed.length) : '';
     $('#taskList').innerHTML = timed.length
       ? timed.map(taskItem).join('')
-      : `<li class="empty">У розкладі на цей день порожньо.<br>
-           <button type="button" data-add>Додати справу з часом</button></li>`;
+      : timedTotal
+        ? '<li class="empty small" data-flip="empty-schedule">Усе з розкладу виконано</li>'
+        : `<li class="empty" data-flip="empty-schedule">У розкладі на цей день порожньо.<br>
+             <button type="button" data-add>Додати справу з часом</button></li>`;
+
+    $('#doneHead').hidden = !done.length;
+    $('#doneCount').textContent = done.length ? String(done.length) : '';
+    $('#doneList').innerHTML = done.map(taskItem).join('');
+    // Підказку про свайп показуємо, доки людина жодного разу не видалила справу свайпом
+    $('#swipeHint').hidden = !all.length || store.get('swipeLearned', false);
   }
 
-  // Натискання в обох списках: галочка, редагування, «додати»
-  function onTaskClick(e) {
+  const dayView = $('#dayView');
+  const findTask = (id) => (tasks[selectedKey] || []).find((t) => t.id === id);
+  let lastSwipeEnd = 0;
+
+  // Натискання в списках справ: галочка, редагування, «додати»
+  dayView.addEventListener('click', (e) => {
+    if (Date.now() - lastSwipeEnd < 400) return;       // після свайпу клік не відкриває редагування
     if (e.target.closest('[data-add]')) { openSheet(); return; }
     const li = e.target.closest('.task');
     if (!li) return;
-    const task = (tasks[selectedKey] || []).find((t) => t.id === li.dataset.id);
+    const task = findTask(li.dataset.id);
     if (!task) return;
-    if (e.target.closest('[data-toggle]')) {          // відмітити виконання
+    const check = e.target.closest('[data-toggle]');
+    if (check) {
+      if (li.classList.contains('completing')) return;
       task.done = !task.done;
-      saveTasks(); renderTasks();
-      if (task.done) toast('Чудово! Справу виконано');
-    } else if (e.target.closest('[data-edit]')) {      // відкрити для редагування
+      task.doneAt = task.done ? Date.now() : null;
+      saveTasks();
+      if (task.done) {
+        // Галочка й конфеті на місці, потім картка плавно їде в «Виконано»
+        li.classList.add('done', 'completing');
+        burst(check, 'joy');
+        haptic(12);
+        setTimeout(() => flip(dayView, renderTasks), reduceMotion ? 0 : 420);
+      } else {
+        flip(dayView, renderTasks);
+      }
+    } else if (e.target.closest('[data-edit]')) {
       openSheet(task);
     }
-  }
-  function onTaskKey(e) {
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-edit]')) { e.preventDefault(); e.target.click(); }
-  }
-  ['#taskList', '#anytimeList'].forEach((sel) => {
-    $(sel).addEventListener('click', onTaskClick);
-    $(sel).addEventListener('keydown', onTaskKey);
   });
+  dayView.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-edit]')) { e.preventDefault(); e.target.click(); }
+  });
+
+  /* --- Свайп ліворуч = видалити ---
+     Захист від випадкового видалення: жест вмикається лише коли рух явно горизонтальний,
+     а видаляє тільки після протягування на ~45% ширини картки. Плюс кнопка «Повернути». */
+  const SWIPE_DELETE_SHARE = 0.45;
+  let swipe = null;
+
+  dayView.addEventListener('pointerdown', (e) => {
+    const card = e.target.closest('.task-card');
+    // Свайп можна почати з будь-якого місця картки, навіть з галочки (якщо руху не було — спрацює звичайне натискання)
+    if (!card || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    swipe = { card, li: card.closest('.task'), id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, active: false };
+  });
+
+  dayView.addEventListener('pointermove', (e) => {
+    if (!swipe || e.pointerId !== swipe.id) return;
+    const k = screenScale();
+    const dx = (e.clientX - swipe.x0) / k, dy = (e.clientY - swipe.y0) / k;
+    if (!swipe.active) {
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { swipe = null; return; }   // це прокрутка
+      if (dx > -14 || Math.abs(dx) < Math.abs(dy) * 1.6) return;                       // ще не ясно
+      swipe.active = true;
+      swipe.card.setPointerCapture(e.pointerId);
+      swipe.li.classList.add('swiping');
+    }
+    // Ліворуч — вільно; праворуч не пускаємо
+    swipe.dx = Math.min(0, dx + 14);
+    swipe.card.style.transform = `translateX(${swipe.dx}px)`;
+    const ratio = Math.min(1, -swipe.dx / (swipe.card.offsetWidth * SWIPE_DELETE_SHARE));
+    swipe.li.style.setProperty('--swipe', ratio.toFixed(3));
+    const ready = ratio >= 1;
+    if (ready !== swipe.li.classList.contains('will-delete')) {
+      swipe.li.classList.toggle('will-delete', ready);
+      if (ready) haptic(8);
+    }
+  });
+
+  function endSwipe(e) {
+    if (!swipe || (e && e.pointerId !== swipe.id)) return;
+    const { li, card, active } = swipe;
+    swipe = null;
+    if (!active) return;
+    lastSwipeEnd = Date.now();
+    if (li.classList.contains('will-delete') && e.type === 'pointerup') {
+      deleteTask(li);
+    } else {
+      // Не дотягнули — картка пружно повертається
+      card.animate([{ transform: card.style.transform }, { transform: 'none' }],
+                   { duration: 260, easing: 'cubic-bezier(.2, .9, .3, 1.2)' });
+      card.style.transform = '';
+      li.classList.remove('swiping', 'will-delete');
+      li.style.removeProperty('--swipe');
+    }
+  }
+  dayView.addEventListener('pointerup', endSwipe);
+  dayView.addEventListener('pointercancel', endSwipe);
+
+  // Видалення: картка розчиняється в пил, решта плавно займає її місце
+  function deleteTask(li) {
+    const list = tasks[selectedKey] || [];
+    const index = list.findIndex((t) => t.id === li.dataset.id);
+    if (index === -1) return;
+    const [removed] = list.splice(index, 1);
+    saveTasks();
+    store.set('swipeLearned', true);
+    const card = li.querySelector('.task-card');
+    burst(card, 'dust');
+    const done = () => flip(dayView, renderTasks);
+    if (reduceMotion) { done(); }
+    else {
+      card.animate([
+        { transform: card.style.transform || 'none', opacity: 1, filter: 'blur(0)' },
+        { transform: 'translateX(-70%) scale(.94)', opacity: 0, filter: 'blur(6px)' }
+      ], { duration: 260, easing: 'ease-in', fill: 'forwards' });
+      li.querySelector('.swipe-bg').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, fill: 'forwards' });
+      setTimeout(done, 230);
+    }
+    toast('Справу видалено', {
+      label: 'Повернути',
+      run: () => {
+        const target = tasks[selectedKey] || (tasks[selectedKey] = []);
+        target.splice(Math.min(index, target.length), 0, removed);
+        saveTasks();
+        flip(dayView, renderTasks);
+      }
+    });
+  }
 
   // Швидко «кинути» справу на день: пишеш назву → Enter
   $('#quickAdd').addEventListener('submit', (e) => {
@@ -277,7 +456,8 @@
     if (!title) { input.focus(); return; }
     (tasks[selectedKey] || (tasks[selectedKey] = [])).push(
       { id: newId(), start: '', end: '', title, sub: '', cat: 'work', done: false });
-    saveTasks(); renderPlanner();
+    saveTasks();
+    flip(dayView, renderPlanner);
     input.value = '';
     input.focus();                                    // одразу можна писати наступну
   });
@@ -762,7 +942,7 @@
   }
 
   // --- Стан екрана ---
-  let goalPeriod = 'year';                          // обраний період
+  let goalPeriod = 'day';                           // обраний період (День — перша вкладка)
   let goalCursor = new Date();                      // яка саме дата/місяць/рік показується
   let sphereFilter = null;                          // id сфери-фільтра або null (усі)
   let showDone = store.get('showDoneGoals', false); // чи розгорнута група «Досягнуті»
@@ -856,7 +1036,7 @@
     const status = !list.length ? null
       : list.every(isDone) ? 'done'
       : share >= 1 ? 'missed'
-      : share === 0 ? null
+      : share === 0 || goalPeriod === 'day' ? null   // для дня темп за годинами не рахуємо — лише зайвий тиск
       : paceByGap(avg, share);
     pill.hidden = !status;
     if (status) { pill.className = 'pace ' + PACE[status].cls; pill.textContent = PACE[status].label; }

@@ -155,7 +155,7 @@
         </figure>
 
         <!-- Вид «День» -->
-        <div class="view" data-view="day">
+        <div class="view" data-view="day" id="dayView">
           <div class="date-row">
             <img src="assets/i-cal.png" alt="">
             <span id="dateLabel">Сьогодні</span>
@@ -180,6 +180,11 @@
           <!-- Розклад: справи з конкретним часом -->
           <div class="section-head schedule-head"><b>Розклад</b><span id="scheduleCount"></span></div>
           <ol class="tasks" id="taskList"></ol>
+
+          <!-- Виконано: усі завершені справи дня (сірі, внизу) -->
+          <div class="section-head done-section-head" id="doneHead" hidden><b>Виконано</b><span id="doneCount"></span></div>
+          <ol class="tasks done-list" id="doneList"></ol>
+          <p class="swipe-hint" id="swipeHint" hidden>Порада: проведи справу ліворуч, щоб видалити її</p>
         </div>
 
         <!-- Вид «Тиждень» -->
@@ -213,9 +218,9 @@
 
       <!-- Перемикач періоду -->
       <div class="seg" role="tablist" id="goalSeg">
-        <button class="on" data-period="year">Рік</button>
+        <button class="on" data-period="day">День</button>
         <button data-period="month">Місяць</button>
-        <button data-period="day">День</button>
+        <button data-period="year">Рік</button>
       </div>
 
       <div class="day-scroll">
@@ -270,12 +275,12 @@
     <!-- Нижнє меню — спільне для екранів «Мій день» і «Цілі» -->
     <nav class="tabbar" id="tabbar">
       <button data-go="day"><img src="assets/tab-plan.png" alt=""><span>План</span></button>
-      <button data-go="focus"><img src="assets/tab-focus.png" alt=""><span>Фокус</span></button>
       <button data-go="goals">
         <!-- Іконка «Цілі»: прапорець -->
         <svg class="tab-svg" viewBox="0 0 24 24"><path d="M6 21V4m0 0h11l-2.5 4L17 12H6"/></svg>
         <span>Цілі</span>
       </button>
+      <button data-go="focus"><img src="assets/tab-focus.png" alt=""><span>Фокус</span></button>
       <button data-soon="Ще"><img src="assets/tab-more.png" alt="" class="tab-more"><span>Ще</span></button>
     </nav>
     <span class="home-indicator dark" id="tabHome"></span>
