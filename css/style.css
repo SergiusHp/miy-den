@@ -1,0 +1,801 @@
+/* =================================================================
+   «МІЙ ДЕНЬ» — стилі
+   Макет: на телефоні застосунок на весь екран; на ПК — у рамці
+   телефону по центру, позаду горизонтальний фон.
+   Усі кольори й шрифти — у змінних нижче, змінюй тут.
+   ================================================================= */
+
+:root {
+  /* --- Кольори --- */
+  --teal: #17383e;          /* темно-бірюзовий: кнопка «Далі», активні вкладки */
+  --teal-2: #22494f;        /* світліший відтінок для градієнтів */
+  --gold-1: #f3d897;        /* золото — світла частина градієнта */
+  --gold-2: #d7ad67;        /* золото — основне */
+  --gold-3: #b88b48;        /* золото — тінь / обвідка */
+  --cream: #f6f1e7;         /* фон світлих екранів */
+  --paper: #fcf9f3;         /* картки */
+  --ink: #1e2a2c;           /* основний текст */
+  --muted: #6e716b;         /* другорядний текст */
+  --line: #e6dfd2;          /* лінії та рамки */
+  --on-dark: #f4eddf;       /* текст на темному фоні */
+
+  /* Кольори категорій справ */
+  --c-spirit: #2f9b70;      /* духовне (молитва, Біблія) */
+  --c-spirit-bg: #e1f0e7;
+  --c-work: #5b8fc3;        /* звичайні справи */
+  --c-priority: #ee9f37;    /* головний пріоритет */
+  --c-important: #e2533e;   /* важливо */
+  --c-important-bg: #fbe6e0;
+
+  /* --- Шрифти --- */
+  --f-head: "Lora", Georgia, "Times New Roman", serif;
+  --f-body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --f-timer: "Noto Serif Display", "Lora", Georgia, serif;
+
+  /* --- Відступи (на телефоні — безпечні зони екрана) --- */
+  --top: calc(env(safe-area-inset-top, 0px) + 10px);
+  --bottom: env(safe-area-inset-bottom, 0px);
+
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: #0f2429;
+  color: var(--ink);
+  font-family: var(--f-body);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+img { max-width: 100%; display: block; }
+[hidden] { display: none !important; }   /* приховані елементи */
+h1, h2, h3, p, ol, ul, figure, blockquote { margin: 0; padding: 0; }
+ol, ul { list-style: none; }
+
+/* ---------- Фон для ПК (горизонтальні картинки) ---------- */
+#backdrop { display: none; position: fixed; inset: 0; }
+.backdrop-layer {
+  position: absolute; inset: 0;
+  background: center / cover no-repeat;
+  transition: opacity .8s ease;
+}
+.backdrop-layer::after { content: ""; position: absolute; inset: 0; background: rgba(8, 20, 24, .35); }
+.bd-splash { background-image: url("../assets/bg-splash-h.jpg"); }
+.bd-focus  { background-image: url("../assets/bg-focus-h.jpg"); opacity: 0; }
+body.bg-focus .bd-focus { opacity: 1; }
+
+/* ---------- «Телефон» ---------- */
+.device { position: fixed; inset: 0; }
+.screen { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--cream); }
+
+/* Статус-бар — лише в рамці на ПК */
+.statusbar { display: none; }
+.home-indicator { display: none; }
+
+/* ---------- Екрани та перехід між ними ---------- */
+.scr {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  padding-top: var(--top);
+  opacity: 0; visibility: hidden;
+  transform: translateX(28px);
+  transition: opacity .45s ease, transform .45s ease, visibility 0s .45s;
+}
+.scr.active { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.scr.leaving { transform: translateX(-28px); }
+
+/* ---------- Кнопки ---------- */
+.btn {
+  width: 100%; height: 56px; border-radius: 28px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--f-head); font-size: 18px; font-weight: 500;
+  transition: transform .15s ease, filter .15s ease;
+}
+.btn:active { transform: scale(.98); }
+.btn:hover { filter: brightness(1.04); }
+.btn-gold {
+  color: #2a2417;
+  background: linear-gradient(180deg, var(--gold-1), var(--gold-2));
+  border: 1px solid rgba(184, 139, 72, .55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 8px 18px rgba(150, 110, 45, .28);
+}
+.btn-teal {
+  color: #fff;
+  background: linear-gradient(180deg, var(--teal-2), var(--teal));
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 8px 18px rgba(23, 56, 62, .25);
+}
+.btn.sm { width: auto; height: 44px; padding: 0 22px; font-size: 16px; }
+.arr { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; }
+.icon-btn img { width: 22px; height: 22px; object-fit: contain; }
+.icon-btn:hover { background: rgba(0,0,0,.04); }
+img.white { filter: brightness(0) invert(1); opacity: .92; }
+
+/* Нижній блок екрана: крапки + кнопка */
+.scr-bottom {
+  margin-top: auto;
+  padding: 0 26px calc(18px + var(--bottom));
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+}
+.dots { display: flex; gap: 10px; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: #d3ccbf; }
+.dots i.on { background: var(--teal); }
+
+/* =================================================================
+   1. ЗАСТАВКА
+   ================================================================= */
+.scr-splash {
+  background: url("../assets/bg-splash-v.jpg") center bottom / cover no-repeat #18334a;
+  color: var(--on-dark);
+}
+.scr-splash::before {   /* легке затемнення неба, щоб текст читався */
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10, 24, 36, .35) 0%, rgba(10, 24, 36, 0) 45%);
+  pointer-events: none;
+}
+.splash-top { position: relative; text-align: center; padding-top: 11vh; display: flex; flex-direction: column; align-items: center; }
+.splash-logo { width: 96px; height: 96px; filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
+.splash-title { margin-top: 30px; font-family: var(--f-head); font-weight: 500; font-size: 46px; letter-spacing: -.01em; color: #f7f0e1; text-shadow: 0 2px 16px rgba(0,0,0,.25); }
+.splash-sub { margin-top: 14px; font-family: var(--f-head); font-size: 20px; line-height: 1.45; color: #efe3c6; }
+.scr-splash .scr-bottom { position: relative; }
+
+/* =================================================================
+   2–4. ОНБОРДИНГ
+   ================================================================= */
+.scr-light { background: linear-gradient(180deg, #faf6ee 0%, var(--cream) 100%); }
+.scr-light > .onb-head,
+.scr-light > .onb-title,
+.scr-light > .onb-text,
+.scr-light > .features { margin-inline: 26px; }
+
+.onb-head { display: flex; align-items: center; justify-content: space-between; height: 44px; margin-left: 16px !important; }
+.onb-count { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.onb-title { margin-top: 22px; font-family: var(--f-head); font-weight: 500; font-size: 29px; line-height: 1.22; color: var(--ink); text-wrap: balance; max-width: 320px; }
+.onb-text { margin-top: 14px; font-size: 15px; line-height: 1.6; color: var(--muted); max-width: 300px; }
+
+/* Спільне для ілюстрацій */
+.illu { position: relative; flex: 1; min-height: 220px; max-height: 340px; margin: 10px 0 6px; }
+.leaf { position: absolute; width: 96px; filter: drop-shadow(0 8px 10px rgba(40, 60, 40, .18)); pointer-events: none; }
+
+/* Ілюстрація 1 — чекліст */
+.illu-cloud { position: absolute; left: 50%; top: 6%; width: 280px; height: 230px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(closest-side, #ece4d5, rgba(236, 228, 213, 0)); }
+.paper {
+  position: absolute; left: 50%; top: 50%;
+  width: 188px; padding: 24px 20px;
+  transform: translate(-46%, -50%) rotate(-7deg);
+  background: var(--paper); border: 1px solid #ede5d6; border-radius: 18px;
+  box-shadow: 0 22px 40px rgba(70, 55, 30, .16), 0 2px 0 #fff inset;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.paper-row { display: flex; align-items: center; gap: 14px; }
+.lines { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.lines i { height: 7px; border-radius: 4px; background: #e4ddd0; }
+.lines i.s { width: 58%; }
+.cb { position: relative; flex: none; width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 3px 6px rgba(0,0,0,.12); }
+.cb::after { content: ""; position: absolute; left: 9px; top: 9px; width: 11px; height: 6px; border: 2.6px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg); }
+.cb-teal { background: linear-gradient(180deg, #3e7272, #2a5a5b); }
+.cb-gold { background: linear-gradient(180deg, #b89a64, #9c7f4c); }
+.cb-empty { background: #f4efe5; border: 1.5px solid #d8cfbe; box-shadow: none; }
+.cb-empty::after { display: none; }
+.illu-check .leaf-front { left: 8%; bottom: -2%; width: 104px; transform: rotate(-24deg); }
+.illu-check .leaf-back { right: 10%; top: 2%; width: 74px; transform: rotate(28deg); opacity: .55; filter: blur(.6px); }
+
+/* Ілюстрація 2 — тиждень і місяць */
+.cal-card {
+  position: absolute; padding: 14px 14px 16px;
+  background: var(--paper); border: 1px solid #ede5d6; border-radius: 16px;
+  box-shadow: 0 18px 34px rgba(70, 55, 30, .15);
+}
+.cal-card-head { display: flex; justify-content: space-between; font-family: var(--f-head); font-size: 15px; color: var(--ink); margin-bottom: 12px; }
+.cal-card-head span { color: #b9b1a2; }
+.cal-week { left: 7%; top: 4%; width: 200px; transform: rotate(-5deg); }
+.cal-month { right: 7%; bottom: 3%; width: 178px; transform: rotate(5deg); z-index: 2; }
+.week-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.week-grid i { aspect-ratio: 1.25; border-radius: 4px; background: #e9e3d8; }
+.month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 9px 6px; justify-items: center; }
+.month-grid i { width: 9px; height: 9px; border-radius: 50%; background: #e3dccf; }
+.month-grid i.gold { width: 14px; height: 14px; margin: -2.5px; background: #e2bd73; box-shadow: 0 0 0 3px rgba(226, 189, 115, .3); }
+.month-grid i.dark { width: 14px; height: 14px; margin: -2.5px; background: var(--teal); }
+.illu-cal .leaf-right { right: -2%; top: 8%; width: 92px; transform: rotate(22deg); }
+.illu-cal .leaf-left { left: 2%; bottom: -6%; width: 86px; transform: rotate(-32deg); z-index: 3; }
+
+/* Екран 4 — список можливостей */
+.features { margin-top: 40px; display: flex; flex-direction: column; gap: 26px; }
+.features li { display: flex; align-items: center; gap: 18px; }
+.features img { width: 66px; height: 66px; flex: none; }
+.features b { display: block; font-family: var(--f-head); font-weight: 500; font-size: 17px; color: var(--ink); }
+.features span { display: block; margin-top: 4px; font-size: 13.5px; line-height: 1.45; color: var(--muted); max-width: 210px; }
+
+/* =================================================================
+   5. МІЙ ДЕНЬ
+   ================================================================= */
+.scr-day { background: var(--cream); }
+.day-head { display: flex; align-items: center; justify-content: space-between; padding: 0 12px; height: 44px; }
+.day-title { font-family: var(--f-head); font-weight: 500; font-size: 22px; }
+
+/* Перемикач День/Тиждень/Місяць */
+.seg {
+  margin: 12px 18px 0; padding: 4px;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: #ece6da; border: 1px solid #e2dacb; border-radius: 14px;
+}
+.seg button { height: 34px; border-radius: 11px; font-size: 13.5px; font-weight: 500; color: #4b504c; transition: background .2s, color .2s; }
+.seg button.on { background: linear-gradient(180deg, var(--teal-2), var(--teal)); color: #fff; box-shadow: 0 3px 8px rgba(23,56,62,.25); }
+
+.day-scroll { flex: 1; overflow-y: auto; padding: 14px 18px calc(150px + var(--bottom)); scrollbar-width: none; }
+.day-scroll::-webkit-scrollbar { display: none; }
+
+/* Цитата дня */
+.verse {
+  position: relative; overflow: hidden;
+  padding: 16px 18px 14px; border-radius: 18px; min-height: 116px;
+  color: var(--on-dark);
+  background:
+    linear-gradient(90deg, rgba(16, 36, 44, .9) 0%, rgba(16, 36, 44, .55) 60%, rgba(16, 36, 44, .1) 100%),
+    url("../assets/bg-splash-v.jpg") 72% 47% / 150% auto no-repeat;
+  box-shadow: 0 10px 22px rgba(20, 40, 45, .18);
+}
+.verse-q { width: 18px; filter: brightness(0) invert(1); opacity: .85; }
+.verse blockquote { margin-top: 6px; font-family: var(--f-head); font-size: 14.5px; line-height: 1.45; max-width: 74%; }
+.verse figcaption { margin-top: 8px; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+
+/* Рядок дати і тижнева стрічка */
+.date-row { margin-top: 18px; display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 600; }
+.date-row img { width: 18px; }
+.week-nav { margin-left: auto; display: flex; gap: 2px; }
+.week-nav button { width: 28px; height: 28px; border-radius: 8px; font-size: 20px; line-height: 1; color: #9a9d97; }
+.week-nav button:hover { background: rgba(0,0,0,.05); color: var(--ink); }
+
+.week-strip { margin-top: 8px; display: grid; grid-template-columns: repeat(7, 1fr); }
+.week-strip button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 4px 0; }
+.week-strip small { font-size: 11px; color: var(--muted); }
+.week-strip b { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; transition: background .2s; }
+.week-strip button:hover b { background: rgba(23,56,62,.07); }
+.week-strip .today b { color: var(--teal); box-shadow: inset 0 0 0 1.5px rgba(23,56,62,.35); }
+.week-strip .sel b { background: var(--teal); color: #fff; box-shadow: none; }
+
+/* Список справ */
+.tasks { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.task { display: grid; grid-template-columns: 44px 1fr; gap: 8px; align-items: stretch; }
+.task-time { padding-top: 10px; font-size: 11.5px; line-height: 1.6; color: var(--muted); font-variant-numeric: tabular-nums; }
+.task-card {
+  --c: var(--c-work);
+  position: relative; display: flex; align-items: center; gap: 10px;
+  min-height: 50px; padding: 8px 12px 8px 14px; text-align: left; width: 100%;
+  background: #fffdf8; border: 1px solid #ebe3d5; border-left: 4px solid var(--c);
+  border-radius: 12px; box-shadow: 0 2px 6px rgba(60, 50, 30, .05);
+  transition: background .2s, transform .15s;
+}
+.task-card:active { transform: scale(.99); }
+.task-card .t { flex: 1; min-width: 0; }
+.task-card .t b { display: block; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.task-card .t span { display: flex; align-items: center; gap: 5px; margin-top: 2px; font-size: 11.5px; color: var(--muted); }
+.task-card .t span.flag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c-important); }
+.task.done .t b { color: #3c4a45; }
+
+/* Кольори за категоріями */
+.task-card.spirit    { --c: var(--c-spirit); }
+.task-card.work      { --c: var(--c-work); }
+.task-card.priority  { --c: var(--c-priority); }
+.task-card.important { --c: var(--c-important); background: var(--c-important-bg); border-color: #f2d5cc; }
+.task.done .task-card.spirit { background: var(--c-spirit-bg); border-color: #cfe5d8; }
+
+/* Кружечок «виконано» */
+.check {
+  flex: none; width: 22px; height: 22px; border-radius: 50%;
+  border: 1.7px solid #8f9590; display: grid; place-items: center;
+  transition: background .2s, border-color .2s;
+}
+.check svg { width: 13px; height: 13px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.task.done .check { background: var(--c-spirit); border-color: var(--c-spirit); }
+.task.done .check svg { opacity: 1; }
+
+/* Заголовки блоків «План без часу» і «Розклад» */
+.section-head { margin-top: 18px; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.section-head b { font-size: 13px; font-weight: 700; color: var(--ink); }
+.section-head span { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Швидке додавання справи без часу */
+.quick-add { margin-top: 8px; display: flex; gap: 8px; }
+.quick-add input {
+  flex: 1; min-width: 0; height: 44px; padding: 0 14px; border-radius: 12px;
+  border: 1.5px dashed #d6ccba; background: rgba(255, 255, 255, .55);
+  font: 14px var(--f-body); color: var(--ink);
+  transition: border-color .2s, background .2s;
+}
+.quick-add input::placeholder { color: #9d9a92; }
+.quick-add input:focus { outline: none; border-style: solid; border-color: var(--teal); background: #fff; }
+.quick-add button {
+  flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
+  background: var(--teal); color: #fff; transition: background .15s, transform .1s;
+}
+.quick-add button:hover { background: var(--teal-2); }
+.quick-add button:active { transform: scale(.94); }
+.quick-add svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+
+/* Справи без часу: без колонки з годинами */
+.anytime-list { margin-top: 8px; }
+.anytime-list:empty { display: none; }
+.task.anytime { grid-template-columns: 1fr; }
+.task.anytime .task-card { min-height: 46px; }
+.task.anytime.done .t b { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(110, 113, 107, .6); }
+.schedule-head + .tasks { margin-top: 8px; }
+
+.empty { margin-top: 26px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.empty button { margin-top: 10px; color: var(--teal); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Вид «Тиждень» */
+.week-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.week-list button { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; padding: 12px 14px; text-align: left; background: #fffdf8; border: 1px solid #ebe3d5; border-radius: 14px; }
+.week-list button.is-today { border-color: var(--teal); }
+.week-list b { font-size: 14px; }
+.week-list .wl-count { font-size: 12px; color: var(--muted); align-self: center; }
+.week-list .bar { grid-column: 1 / -1; height: 6px; border-radius: 4px; background: #ece6da; overflow: hidden; }
+.week-list .bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--c-spirit), #7cc1a0); }
+
+/* Вид «Місяць» */
+.month-head { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; }
+.month-head b { font-family: var(--f-head); font-weight: 500; font-size: 18px; }
+.month-head button { width: 36px; height: 36px; border-radius: 10px; font-size: 22px; color: var(--muted); }
+.month-cal { margin-top: 10px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 10px; background: #fffdf8; border: 1px solid #ebe3d5; border-radius: 16px; }
+.month-cal small { text-align: center; font-size: 11px; color: var(--muted); padding-bottom: 4px; }
+.month-cal button { position: relative; aspect-ratio: 1; border-radius: 50%; font-size: 13.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.month-cal button:hover { background: rgba(23,56,62,.07); }
+.month-cal button.today { background: var(--teal); color: #fff; }
+.month-cal button.has::after { content: ""; position: absolute; left: 50%; bottom: 4px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--gold-2); }
+
+/* Кнопка «+» — «рідке скло» у стилі Apple: прозора, крізь неї видно інтерфейс;
+   під пальцем темніє, після відпускання знову стає прозорою */
+.fab {
+  position: absolute; right: 20px; bottom: calc(82px + var(--bottom));
+  width: 56px; height: 56px; border-radius: 50%;
+  display: grid; place-items: center; overflow: hidden; z-index: 5;
+  color: var(--teal);
+  background: rgba(255, 255, 255, .06);
+  backdrop-filter: blur(3px) saturate(170%); -webkit-backdrop-filter: blur(3px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, .75);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, .9),     /* відблиск зверху */
+    inset 0 -1px 2px rgba(23, 56, 62, .12),         /* тінь знизу всередині */
+    0 10px 26px rgba(23, 56, 62, .18), 0 2px 6px rgba(23, 56, 62, .1);
+  transition: background .35s ease, color .35s ease, transform .35s cubic-bezier(.2, .9, .3, 1.3), box-shadow .35s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Скляний полиск */
+.fab::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background:
+    radial-gradient(100% 55% at 30% 0%, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 60%),
+    radial-gradient(80% 50% at 70% 105%, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 60%);
+  transition: opacity .35s ease;
+}
+.fab:hover { background: rgba(255, 255, 255, .16); }
+/* Натискання: темніє (миттєво), потім плавно повертається */
+.fab:active, .fab.pressed {
+  color: #fff;
+  background: rgba(23, 56, 62, .82);
+  transform: scale(.92);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .35), 0 4px 12px rgba(23, 56, 62, .25);
+  transition-duration: .08s;
+}
+.fab:active::before, .fab.pressed::before { opacity: .25; }
+.fab svg { position: relative; width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+
+/* Нижнє меню — одне на екрани «Мій день» і «Цілі»; на інших екранах сховане */
+.tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 8;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding: 8px 6px calc(8px + var(--bottom));
+  background: rgba(252, 249, 243, .96); backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+  opacity: 0; visibility: hidden; transform: translateY(12px);
+  transition: opacity .35s ease, transform .35s ease, visibility 0s .35s;
+}
+.screen[data-screen="day"] .tabbar,
+.screen[data-screen="goals"] .tabbar { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.tabbar button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 0; opacity: .5; transition: opacity .2s; }
+.tabbar button.on, .tabbar button:hover { opacity: 1; }
+.tabbar img { width: 22px; height: 23px; object-fit: contain; }
+.tabbar img.tab-more { height: 8px; margin: 7px 0 8px; }
+.tab-svg { width: 23px; height: 23px; fill: none; stroke: #16272b; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+.tabbar span { font-size: 11px; font-weight: 500; }
+.tabbar button.on span { font-weight: 700; }
+
+/* =================================================================
+   7. ЦІЛІ
+   Порядок на екрані: період → підсумок → сфери → порада → цілі → перенесення
+   ================================================================= */
+.scr-goals { background: var(--cream); }
+
+/* Рядок періоду над підсумком */
+.period-row { margin-top: 2px; margin-bottom: 12px; }
+.today-btn { margin-left: 6px; font-size: 12px; }
+
+/* --- Картка-підсумок: кільце прогресу + скільки часу минуло --- */
+.goal-sum {
+  position: relative; display: flex; align-items: center; gap: 18px;
+  padding: 18px; border-radius: 18px; color: var(--on-dark);
+  background:
+    linear-gradient(90deg, rgba(12, 34, 40, .92) 0%, rgba(12, 34, 40, .62) 65%, rgba(12, 34, 40, .4) 100%),
+    url("../assets/bg-focus-h.jpg") center 40% / cover no-repeat;
+  box-shadow: 0 10px 22px rgba(20, 40, 45, .18);
+}
+.sum-ring { width: 80px; height: 80px; flex: none; overflow: visible; }
+.sum-track { fill: rgba(255,255,255,.06); stroke: rgba(255,255,255,.18); stroke-width: 5; }
+.sum-bar {
+  fill: none; stroke: #e2bd73; stroke-width: 5; stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: 40px 40px;
+  stroke-dasharray: 213.63; stroke-dashoffset: 213.63;
+  transition: stroke-dashoffset .6s ease;
+}
+.sum-time { fill: #fff; stroke: rgba(12, 34, 40, .9); stroke-width: 1.5; }
+.sum-pct { position: absolute; left: 18px; width: 80px; text-align: center; font-family: var(--f-head); font-size: 20px; font-variant-numeric: tabular-nums; }
+.sum-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.sum-text small { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .72; }
+.sum-text b { font-family: var(--f-head); font-weight: 500; font-size: 17px; line-height: 1.3; }
+.sum-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 2px; font-size: 12px; color: rgba(244, 237, 223, .8); }
+
+/* Статус темпу: зелений / жовтий / червоний */
+.pace { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 10px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.pace.ok   { background: #e1f0e7; color: #1f6b4b; }
+.pace.warn { background: #fbefd6; color: #8c560b; }
+.pace.bad  { background: #fbe1da; color: #a8341f; }
+.goal-sum .pace.ok   { background: rgba(124, 205, 160, .2); color: #a6e3c0; }
+.goal-sum .pace.warn { background: rgba(238, 170, 70, .2);  color: #f6cf8e; }
+.goal-sum .pace.bad  { background: rgba(240, 110, 90, .22); color: #f7b3a5; }
+
+/* --- Сфери життя: чипи-фільтри --- */
+.sphere-chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+.sphere-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 20px;
+  background: #fffdf8; border: 1px solid #ebe3d5;
+  font-size: 12px; color: var(--ink); transition: background .15s, color .15s;
+}
+.sphere-chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); }
+.sphere-chip b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.sphere-chip:hover { background: #f3eee4; }
+.sphere-chip.on { background: var(--teal); border-color: var(--teal); color: #fff; }
+.sphere-chip.on::before { box-shadow: 0 0 0 2px #fff; }
+.sphere-chip.edit { color: var(--teal); font-weight: 600; border-style: dashed; }
+.sphere-chip.edit::before { display: none; }
+
+/* --- Порада тренера --- */
+.goal-tip {
+  margin-top: 12px; display: flex; gap: 10px; align-items: flex-start;
+  padding: 12px 12px 12px 14px; border-radius: 14px;
+  background: #fbf3e2; border: 1px solid #efdcb5;
+  font-size: 13px; line-height: 1.5; color: #5a4a2c;
+}
+.goal-tip b { display: block; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #9a7533; margin-bottom: 2px; }
+.goal-tip div { flex: 1; min-width: 0; }
+.goal-tip button { flex: none; width: 28px; height: 28px; border-radius: 8px; font-size: 18px; color: #9a7533; }
+.goal-tip button:hover { background: rgba(154, 117, 51, .1); }
+
+/* --- Список цілей --- */
+.goals { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.goal {
+  /* колір (--c) приходить зі сфери життя: style="--c: #колір" */
+  --c: var(--c-spirit);
+  padding: 14px 12px 12px 14px; border-radius: 16px;
+  background: #fffdf8; border: 1px solid #ebe3d5;
+  box-shadow: 0 2px 6px rgba(60, 50, 30, .05);
+}
+
+/* Головна ціль періоду */
+.goal.main {
+  background: linear-gradient(180deg, #fff8ea, #fffdf8 60%);
+  border-color: #e2bd73; box-shadow: 0 0 0 1px #e2bd73 inset, 0 6px 16px rgba(180, 140, 60, .12);
+}
+.main-badge { display: inline-block; margin-bottom: 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #9a7533; }
+
+.goal-top { display: flex; align-items: flex-start; gap: 8px; }
+.goal-top::before { content: ""; flex: none; width: 9px; height: 9px; margin-top: 6px; border-radius: 50%; background: var(--c); }
+.goal-title { flex: 1; min-width: 0; text-align: left; }
+.goal-title b { font-size: 14.5px; font-weight: 600; line-height: 1.35; color: var(--ink); }
+.goal-pct {
+  padding-top: 1px; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
+  color: var(--c);
+  color: color-mix(in srgb, var(--c) 78%, #1e2a2c);   /* трохи темніше, щоб світлі кольори читалися */
+}
+.goal-edit { flex: none; width: 28px; height: 28px; margin: -4px -4px 0 0; border-radius: 8px; display: grid; place-items: center; }
+.goal-edit img { width: 15px; height: 15px; object-fit: contain; opacity: .45; transition: opacity .15s; }
+.goal-edit:hover { background: rgba(0,0,0,.04); }
+.goal-edit:hover img { opacity: .9; }
+
+.goal-why  { margin: 4px 0 0 17px; font-size: 12.5px; font-style: italic; line-height: 1.45; color: var(--muted); }
+.goal-link { margin: 4px 0 0 17px; font-size: 12px; font-weight: 600; color: var(--teal); }
+.goal-link span { font-weight: 500; color: var(--muted); }
+
+/* Смужка прогресу; тонка риска — де варто бути зараз за часом */
+.goal-bar { position: relative; margin-top: 10px; height: 8px; border-radius: 5px; background: #ece6da; }
+.goal-bar i { display: block; height: 100%; border-radius: 5px; background: var(--c); transition: width .4s ease; }
+.pace-mark { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--ink); opacity: .55; }
+
+.goal-bottom { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.goal-count { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.goal-ctrl { display: flex; gap: 8px; }
+.goal-ctrl button {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1px solid var(--line); background: #fff; font-size: 19px; color: var(--ink);
+  transition: background .15s, transform .1s;
+}
+.goal-ctrl button:active { transform: scale(.94); }
+.goal-ctrl button:hover { background: #f3eee4; }
+.goal-ctrl button.plus { background: var(--teal); border-color: var(--teal); color: #fff; }
+.goal-ctrl button.plus:hover { background: var(--teal-2); }
+
+/* Нижній рядок: статус, підказка темпу, «У план» */
+.goal-meta {
+  margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e6dfd2;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+}
+.goal-hint { font-size: 12px; color: var(--muted); }
+.to-plan {
+  margin-left: auto; padding: 6px 10px; border-radius: 10px;
+  font-size: 12.5px; font-weight: 600; color: var(--teal); background: #eaf1ef;
+  transition: background .15s;
+}
+.to-plan:hover { background: #dbe8e4; }
+
+/* Кнопка-галочка для цілей «зроблено / не зроблено» */
+.goal-check { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.goal-check .check { width: 26px; height: 26px; }
+
+/* Досягнута ціль */
+.goal.done { background: #f4f8f3; border-color: #d6e6da; box-shadow: none; }
+.goal.done .goal-count { color: var(--c-spirit); font-weight: 600; }
+.goal.done .goal-check .check { background: var(--c-spirit); border-color: var(--c-spirit); }
+.goal.done .goal-check .check svg { opacity: 1; }
+
+/* Група «Досягнуті» (згортається) */
+.done-head button { display: flex; align-items: center; gap: 6px; padding: 8px 2px 2px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.done-head button:hover { color: var(--ink); }
+
+/* Перенесення незавершених цілей */
+.carry-btn {
+  width: 100%; margin-top: 12px; min-height: 44px; padding: 10px 14px; border-radius: 12px;
+  border: 1.5px dashed #cfc5b3; font-size: 13.5px; font-weight: 600; color: var(--teal);
+}
+.carry-btn:hover { background: #f3eee4; }
+
+/* Поля шторки цілі */
+.check-row { flex-direction: row !important; align-items: center; gap: 10px !important; font-size: 14px !important; color: var(--ink) !important; cursor: pointer; }
+.check-row input { width: 20px; height: 20px; accent-color: var(--teal); }
+
+/* =================================================================
+   6. ФОКУС
+   ================================================================= */
+.scr-focus {
+  background: url("../assets/bg-focus-v.jpg") center / cover no-repeat #10303a;
+  color: var(--on-dark);
+}
+.scr-focus::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,26,32,.25), rgba(8,26,32,.1) 40%, rgba(8,26,32,.45)); pointer-events: none; }
+.scr-focus > * { position: relative; }
+.focus-head { display: flex; align-items: center; justify-content: space-between; padding: 0 12px; height: 44px; }
+.focus-head h2 { font-family: var(--f-head); font-weight: 500; font-size: 22px; color: #f3ecdd; }
+.focus-head .icon-btn:hover { background: rgba(255,255,255,.08); }
+
+.focus-chip {
+  align-self: center; margin-top: 22px;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 11px 18px; border-radius: 14px;
+  background: rgba(18, 46, 54, .55); border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(8px);
+  font-size: 13.5px; color: #efe9dc; max-width: calc(100% - 48px);
+}
+.focus-chip i { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #ef6b5b; box-shadow: 0 0 8px rgba(239,107,91,.6); }
+.focus-chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Кільце таймера */
+.ring { position: relative; width: 262px; height: 262px; margin: 26px auto 0; flex: none; }
+.ring > svg { width: 100%; height: 100%; overflow: visible; }
+.ring-track { fill: rgba(8, 28, 34, .28); stroke: rgba(255,255,255,.2); stroke-width: 2; }
+.ring-bar {
+  fill: none; stroke: url(#gold); stroke-width: 4; stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: 120px 120px;
+  stroke-dasharray: 678.58; stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 6px rgba(243, 215, 154, .45));
+  transition: stroke-dashoffset .9s linear;
+}
+.ring-knob { fill: #f6dfa9; filter: drop-shadow(0 0 6px rgba(246, 223, 169, .9)); }
+
+/* --- Коло-регулятор для режиму «Власний» --- */
+.dial-ticks { opacity: 0; transition: opacity .3s; }
+.dial-ticks line { stroke: rgba(255, 255, 255, .28); stroke-width: 1.4; stroke-linecap: round; }
+.dial-ticks line.major { stroke: rgba(246, 223, 169, .75); stroke-width: 2.2; }
+.dial-handle {
+  fill: #f6dfa9; stroke: #fffaf0; stroke-width: 3;
+  filter: drop-shadow(0 0 10px rgba(246, 223, 169, .85));
+  opacity: 0; transition: opacity .3s; pointer-events: none;
+}
+.ring.dial-edit { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.ring.dial-edit.dragging { cursor: grabbing; }
+.ring.dial-edit .dial-ticks,
+.ring.dial-edit .dial-handle { opacity: 1; }
+.ring.dial-edit .ring-knob { opacity: 0; }
+.ring.dial-edit .ring-bar { transition: none; }          /* під час прокручування — без затримки */
+.ring.dial-edit .ring-cap { color: #f6dfa9; }
+.ring.dial-edit:not(.dragging) .dial-handle { animation: dialPulse 1.8s ease-in-out infinite; }
+.ring:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 6px; border-radius: 50%; }
+@keyframes dialPulse { 50% { filter: drop-shadow(0 0 18px rgba(246, 223, 169, 1)); } }
+
+.ring-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.time { font-family: var(--f-timer); font-weight: 300; font-size: 64px; line-height: 1; letter-spacing: .01em; color: #f7f1e3; font-variant-numeric: tabular-nums; }
+.sprout { width: 22px; height: 22px; margin-top: 14px; fill: none; stroke: #d9c08a; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.ring-cap { margin-top: 6px; font-size: 12px; color: rgba(240, 234, 222, .72); }
+
+/* Керування */
+.controls { margin-top: 30px; display: flex; align-items: center; justify-content: center; gap: 28px; }
+.ctl img { width: 58px; height: 58px; }
+.ctl:hover img { filter: brightness(1.15); }
+.play {
+  width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 28%, #f8e1a8, var(--gold-2) 60%, var(--gold-3));
+  border: 1px solid rgba(255, 230, 170, .6);
+  box-shadow: 0 12px 28px rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.4);
+  transition: transform .15s;
+}
+.play:active { transform: scale(.96); }
+.play svg { width: 36px; height: 36px; fill: #1f2422; }
+.play .i-play { margin-left: 4px; }
+.play .i-pause, .running .play .i-play { display: none; }
+.running .play .i-pause { display: block; }
+
+/* Режими */
+.modes {
+  margin-top: auto; padding: 0 16px calc(22px + var(--bottom));
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+}
+.mode { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+/* Плитка — «скло» на темному фоні; активна — золота, як кнопка «Старт» */
+.mode .tile {
+  width: 60px; height: 60px; margin-bottom: 6px; border-radius: 20px;
+  display: grid; place-items: center;
+  color: #efe6d2;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .15);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .08);
+  transition: background .2s, color .2s, transform .15s, box-shadow .2s;
+}
+.mode .tile svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.mode:hover .tile { background: rgba(255, 255, 255, .12); }
+.mode:active .tile { transform: scale(.95); }
+.mode.on .tile {
+  color: #17383e;
+  background: radial-gradient(circle at 35% 28%, #f8e1a8, var(--gold-2) 70%, var(--gold-3));
+  border-color: rgba(255, 236, 190, .7);
+  box-shadow: 0 10px 22px rgba(214, 171, 98, .35), inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+.mode b { font-size: 12px; font-weight: 600; color: #efe7d6; transition: color .2s; }
+.mode.on b { color: #f3d58f; }
+.mode small { font-size: 11px; color: rgba(239, 231, 214, .65); font-variant-numeric: tabular-nums; }
+
+/* =================================================================
+   Шторка «Нова справа»
+   ================================================================= */
+.sheet-wrap { position: absolute; inset: 0; z-index: 20; display: flex; align-items: flex-end; background: rgba(14, 30, 34, .45); animation: fade .25s ease; }
+.sheet {
+  width: 100%; max-height: 92%; overflow-y: auto;
+  padding: 10px 20px calc(20px + var(--bottom));
+  background: var(--paper); border-radius: 24px 24px 0 0;
+  display: flex; flex-direction: column; gap: 12px;
+  animation: up .3s ease;
+}
+.sheet > * { flex-shrink: 0; }   /* щоб елементи не стискалися, коли шторка прокручується */
+.sheet-grip { align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #ddd5c6; }
+.sheet h3 { font-family: var(--f-head); font-weight: 500; font-size: 20px; }
+.sheet label { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.sheet input:not([type="radio"]):not([type="checkbox"]), .sheet select {
+  width: 100%; min-width: 0; height: 44px; padding: 0 12px; border-radius: 12px;
+  border: 1px solid var(--line); background: #fff;
+  font: 15px var(--f-body); color: var(--ink);
+}
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cats { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.cats legend { padding: 0 0 6px; font-size: 12.5px; color: var(--muted); }
+.cats label { flex-direction: row; }
+.cats input { position: absolute; opacity: 0; pointer-events: none; }
+.cats span { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-size: 13px; color: var(--ink); cursor: pointer; }
+.cats span::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--dot); }
+.cats input:checked + span { border-color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal); }
+.cats input:focus-visible + span { outline: 2px solid var(--gold-2); }
+.cats-legend { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.cats-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.link-btn { font-size: 12.5px; font-weight: 600; color: var(--teal); text-decoration: underline; text-underline-offset: 3px; }
+.sheet-hint { font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+/* Редактор сфер життя */
+.spheres { display: flex; flex-direction: column; gap: 10px; }
+.sphere-row { padding: 10px; border-radius: 14px; background: #fff; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.sphere-head { display: flex; align-items: center; gap: 10px; }
+.sphere-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 0 3px color-mix(in srgb, var(--dot) 22%, transparent); }
+.sheet .sphere-name { flex: 1; min-width: 0; height: 38px !important; }
+.sphere-del { flex: none; height: 34px; padding: 0 10px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.sphere-del:hover { background: #f6efe9; color: var(--c-important); }
+.sphere-row.confirm .sphere-del { background: var(--c-important); color: #fff; }
+.sphere-warn { font-size: 12px; color: var(--c-important); }
+.swatches { display: flex; flex-wrap: wrap; gap: 5px; }
+.sw {
+  position: relative; flex: none; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--sw); border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line);
+  cursor: pointer; transition: transform .15s;
+}
+.sw:hover { transform: scale(1.1); }
+.sw.on { box-shadow: 0 0 0 2px var(--ink); }
+/* Власний колір: кружечок-веселка з прихованим вибором кольору */
+.sw-custom { background: conic-gradient(#e2533e, #ee9f37, #e7c98f, #2f9b70, #5b8fc3, #8a7cc4, #e2533e); }
+.sheet .sw-custom input { position: absolute; inset: 0; width: 100% !important; height: 100% !important; opacity: 0; cursor: pointer; border: 0; padding: 0; }
+.add-sphere { height: 44px; border-radius: 12px; border: 1.5px dashed #cfc5b3; font-weight: 600; font-size: 14px; color: var(--teal); }
+.add-sphere:hover { background: #f3eee4; }
+
+.c-spirit { --dot: var(--c-spirit); } .c-work { --dot: var(--c-work); }
+.c-priority { --dot: var(--c-priority); } .c-important { --dot: var(--c-important); }
+.sheet-actions { margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.btn-ghost { height: 44px; padding: 0 14px; border-radius: 12px; font-weight: 600; font-size: 14px; color: var(--muted); }
+.btn-ghost.danger { margin-right: auto; color: var(--c-important); }
+
+/* Сповіщення-підказка */
+.toast {
+  position: absolute; left: 50%; top: calc(var(--top) + 52px); z-index: 30;
+  transform: translate(-50%, -10px); opacity: 0; pointer-events: none;
+  padding: 10px 16px; border-radius: 14px; max-width: 86%; text-align: center;
+  background: rgba(23, 56, 62, .96); color: #fff; font-size: 13.5px; line-height: 1.4;
+  box-shadow: 0 10px 24px rgba(0,0,0,.25);
+  transition: opacity .25s, transform .25s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@keyframes fade { from { opacity: 0; } }
+@keyframes up { from { transform: translateY(40px); opacity: 0; } }
+
+/* =================================================================
+   ПК / ПЛАНШЕТ: застосунок у рамці телефону
+   ================================================================= */
+@media (min-width: 700px) and (min-height: 560px) {
+  body { display: grid; place-items: center; }
+  #backdrop { display: block; }
+  .device {
+    position: relative; inset: auto; flex: none;
+    width: 390px; height: 844px; border-radius: 58px;
+    transform: scale(var(--scale, 1));
+    box-shadow: 0 0 0 11px #0b0d0e, 0 0 0 13px #3b4044, 0 50px 90px rgba(0,0,0,.55);
+  }
+  .screen { border-radius: 58px; }
+  .device { --top: 54px; --bottom: 14px; }
+
+  .statusbar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 40; height: 50px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 30px 0 40px; pointer-events: none;
+    font: 600 15px var(--f-body); color: var(--ink); transition: color .3s;
+  }
+  .statusbar svg { fill: currentColor; color: currentColor; }
+  .sb-icons { display: flex; gap: 6px; align-items: center; }
+  .sb-island { position: absolute; left: 50%; top: 11px; width: 120px; height: 34px; margin-left: -60px; border-radius: 20px; background: #000; }
+  .screen[data-screen="splash"] .statusbar,
+  .screen[data-screen="focus"] .statusbar { color: #fff; }
+
+  .home-indicator { display: block; width: 134px; height: 5px; margin-top: -6px; border-radius: 3px; background: rgba(30, 42, 44, .85); }
+  .scr-splash .home-indicator, .scr-focus .home-indicator { background: rgba(255,255,255,.85); }
+  .scr-focus > .home-indicator { position: absolute; left: 50%; bottom: 8px; margin-left: -67px; }
+  .home-indicator.dark { position: absolute; left: 50%; bottom: 8px; margin-left: -67px; z-index: 9; transition: opacity .35s; }
+  .screen:not([data-screen="day"]):not([data-screen="goals"]) .home-indicator.dark { opacity: 0; }
+  .tabbar { padding-bottom: 22px; }
+  .fab { bottom: 96px; }
+  .modes { padding-bottom: 30px; }
+  .splash-top { padding-top: 90px; }
+}
+
+/* Менше руху для тих, хто його вимкнув у системі */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
+}
