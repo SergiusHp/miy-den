@@ -46,83 +46,24 @@
         <p class="splash-sub">Плануй свій день<br>з метою</p>
       </div>
       <div class="scr-bottom">
-        <button class="btn btn-gold" data-go="onb1">Почати</button>
+        <button class="btn btn-gold" data-go="intro">Почати</button>
         <span class="home-indicator"></span>
       </div>
     </section>
 
-    <!-- ========== 2. ОНБОРДИНГ 1/3 ========== -->
-    <section class="scr scr-light" data-name="onb1">
+    <!-- ========== 2. ВСТУП (один екран перед стартом) ========== -->
+    <section class="scr scr-light" data-name="intro">
       <header class="onb-head">
         <button class="icon-btn" data-go="splash" aria-label="Назад"><img src="assets/i-back.png" alt=""></button>
-        <span class="onb-count">1/3</span>
-      </header>
-      <h2 class="onb-title">Плануй свій день усвідомлено</h2>
-      <p class="onb-text">Розставляй пріоритети, створюй завдання та керуй своїм часом з Богом у серці.</p>
-
-      <!-- Ілюстрація: картка-чекліст з гілочками -->
-      <div class="illu illu-check" aria-hidden="true">
-        <span class="illu-cloud"></span>
-        <img class="leaf leaf-back" src="assets/branch.png" alt="">
-        <div class="paper">
-          <div class="paper-row"><span class="cb cb-teal"></span><span class="lines"><i></i><i class="s"></i></span></div>
-          <div class="paper-row"><span class="cb cb-gold"></span><span class="lines"><i></i><i class="s"></i></span></div>
-          <div class="paper-row"><span class="cb cb-teal"></span><span class="lines"><i></i><i class="s"></i></span></div>
-          <div class="paper-row"><span class="cb cb-empty"></span><span class="lines"><i></i><i class="s"></i></span></div>
-        </div>
-        <img class="leaf leaf-front" src="assets/branch.png" alt="">
-      </div>
-
-      <div class="scr-bottom">
-        <div class="dots"><i class="on"></i><i></i><i></i></div>
-        <button class="btn btn-teal" data-go="onb2">Далі <svg class="arr" viewBox="0 0 20 20"><path d="M4 10h11m-4-4 4 4-4 4"/></svg></button>
-        <span class="home-indicator"></span>
-      </div>
-    </section>
-
-    <!-- ========== 3. ОНБОРДИНГ 2/3 ========== -->
-    <section class="scr scr-light" data-name="onb2">
-      <header class="onb-head">
-        <button class="icon-btn" data-go="onb1" aria-label="Назад"><img src="assets/i-back.png" alt=""></button>
-        <span class="onb-count">2/3</span>
-      </header>
-      <h2 class="onb-title">Бач свій тиждень і місяць у цілому</h2>
-      <p class="onb-text">Відстежуй прогрес, плануй важливе та зберігай баланс у всіх сферах життя.</p>
-
-      <!-- Ілюстрація: картки «Тиждень» і «Місяць» (клітинки генерує app.js) -->
-      <div class="illu illu-cal" aria-hidden="true">
-        <img class="leaf leaf-right" src="assets/branch.png" alt="">
-        <div class="cal-card cal-week">
-          <div class="cal-card-head">Тиждень <span>›</span></div>
-          <div class="week-grid" id="illuWeek"></div>
-        </div>
-        <div class="cal-card cal-month">
-          <div class="cal-card-head">Місяць <span>›</span></div>
-          <div class="month-grid" id="illuMonth"></div>
-        </div>
-        <img class="leaf leaf-left" src="assets/branch.png" alt="">
-      </div>
-
-      <div class="scr-bottom">
-        <div class="dots"><i></i><i class="on"></i><i></i></div>
-        <button class="btn btn-teal" data-go="onb3">Далі <svg class="arr" viewBox="0 0 20 20"><path d="M4 10h11m-4-4 4 4-4 4"/></svg></button>
-        <span class="home-indicator"></span>
-      </div>
-    </section>
-
-    <!-- ========== 4. ОНБОРДИНГ 3/3 ========== -->
-    <section class="scr scr-light" data-name="onb3">
-      <header class="onb-head">
-        <button class="icon-btn" data-go="onb2" aria-label="Назад"><img src="assets/i-back.png" alt=""></button>
-        <span class="onb-count">3/3</span>
       </header>
       <h2 class="onb-title">Зосереджуйся, молись, живи глибше</h2>
-      <p class="onb-text">Використовуй час мудро — через фокус, молитву та усвідомленість.</p>
+      <p class="onb-text">Використовуй час мудро — через план дня, фокус і цілі, що ведуть до головного.</p>
 
       <ul class="features">
+        <li><img src="assets/ic-leaf.png" alt=""><div><b>План дня</b><span>Справи з часом і без, головне — першим</span></div></li>
+        <li><span class="feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 21V4m0 0h11l-2.5 4L17 12H6"/></svg></span>
+            <div><b>Цілі</b><span>Рік, місяць і день в одній картині</span></div></li>
         <li><img src="assets/ic-target.png" alt=""><div><b>Фокус</b><span>Без відволікань</span></div></li>
-        <li><img src="assets/ic-pray.png" alt=""><div><b>Молитва</b><span>Сила на кожен день</span></div></li>
-        <li><img src="assets/ic-leaf.png" alt=""><div><b>Усвідомленість</b><span>Більше спокою в щоденних справах</span></div></li>
       </ul>
 
       <div class="scr-bottom">
@@ -131,12 +72,12 @@
       </div>
     </section>
 
-    <!-- ========== 5. МІЙ ДЕНЬ (планувальник) ========== -->
+    <!-- ========== 3. МІЙ ДЕНЬ (планувальник) ========== -->
     <section class="scr scr-light scr-day" data-name="day">
       <header class="day-head">
-        <button class="icon-btn" data-soon="Меню" aria-label="Меню"><img src="assets/i-menu.png" alt=""></button>
+        <span class="head-spacer"></span>
         <h2 class="day-title">Мій день</h2>
-        <button class="icon-btn" id="bellBtn" aria-label="Сповіщення"><img src="assets/i-bell.png" alt=""></button>
+        <span class="head-spacer"></span>
       </header>
 
       <!-- Перемикач День / Тиждень / Місяць -->
@@ -165,6 +106,7 @@
             </span>
           </div>
           <div class="week-strip" id="weekStrip"></div>
+          <p class="load-warn" id="loadWarn" hidden></p>
           <!-- План без часу: швидко «кинути» справу на день, без прив'язки до години -->
           <section class="anytime">
             <div class="section-head"><b>План без часу</b><span id="anytimeCount"></span></div>
@@ -211,7 +153,7 @@
     <!-- ========== 7. ЦІЛІ (рік / місяць / день) ========== -->
     <section class="scr scr-light scr-goals" data-name="goals">
       <header class="day-head">
-        <button class="icon-btn" data-soon="Меню" aria-label="Меню"><img src="assets/i-menu.png" alt=""></button>
+        <span class="head-spacer"></span>
         <h2 class="day-title">Цілі</h2>
         <button class="icon-btn" id="goalsInfoBtn" aria-label="Підсумок"><img src="assets/i-bars.png" alt=""></button>
       </header>
@@ -263,6 +205,9 @@
         <!-- Список цілей (генерує app.js) -->
         <ol class="goals" id="goalList"></ol>
 
+        <!-- Лише на вкладці «День»: цілі місяця й року, з яких можна взяти крок у план -->
+        <div id="goalPick"></div>
+
         <!-- Перенесення незавершених цілей з попереднього періоду -->
         <button type="button" class="carry-btn" id="carryBtn" hidden></button>
       </div>
@@ -281,7 +226,7 @@
         <span>Цілі</span>
       </button>
       <button data-go="focus"><img src="assets/tab-focus.png" alt=""><span>Фокус</span></button>
-      <button data-soon="Ще"><img src="assets/tab-more.png" alt="" class="tab-more"><span>Ще</span></button>
+      <button id="moreBtn"><img src="assets/tab-more.png" alt="" class="tab-more"><span>Ще</span></button>
     </nav>
     <span class="home-indicator dark" id="tabHome"></span>
 
@@ -330,16 +275,12 @@
       </div>
 
       <!-- Режими таймера. Іконки — з Figma, бібліотека «Simple Design System»
-           (Clock, Coffee, Book open, Sliders); колір задає CSS через currentColor -->
+           (Pause circle, Book open, Sliders); колір задає CSS через currentColor -->
       <div class="modes" id="modes">
         <!-- Перерва: час налаштовується колом, як у «Власному» (іконка Figma: Pause circle) -->
         <button class="mode" data-mode="break">
           <span class="tile"><svg viewBox="0 0 48 48"><path d="M20 30V18M28 30V18M44 24C44 35.0457 35.0457 44 24 44C12.9543 44 4 35.0457 4 24C4 12.9543 12.9543 4 24 4C35.0457 4 44 12.9543 44 24Z"/></svg></span>
           <b>Перерва</b><small data-dial-label="break">10 хв</small>
-        </button>
-        <button class="mode" data-mode="short">
-          <span class="tile"><svg viewBox="0 0 48 48"><path d="M36 16H38C40.1217 16 42.1566 16.8429 43.6569 18.3431C45.1571 19.8434 46 21.8783 46 24C46 26.1217 45.1571 28.1566 43.6569 29.6569C42.1566 31.1571 40.1217 32 38 32H36M36 16H4V34C4 36.1217 4.84285 38.1566 6.34315 39.6569C7.84344 41.1571 9.87827 42 12 42H28C30.1217 42 32.1566 41.1571 33.6569 39.6569C35.1571 38.1566 36 36.1217 36 34V16ZM12 2V8M20 2V8M28 2V8"/></svg></span>
-          <b>Коротка</b><small>5 хв</small>
         </button>
         <button class="mode" data-mode="long">
           <span class="tile"><svg viewBox="0 0 48 48"><path d="M24 14C24 11.8783 23.1571 9.84344 21.6569 8.34315C20.1566 6.84285 18.1217 6 16 6H4V36H18C19.5913 36 21.1174 36.6321 22.2426 37.7574C23.3679 38.8826 24 40.4087 24 42M24 14V42M24 14C24 11.8783 24.8429 9.84344 26.3431 8.34315C27.8434 6.84285 29.8783 6 32 6H44V36H30C28.4087 36 26.8826 36.6321 25.7574 37.7574C24.6321 38.8826 24 40.4087 24 42"/></svg></span>
@@ -359,6 +300,7 @@
         <span class="sheet-grip"></span>
         <h3 id="sheetTitle">Нова справа</h3>
         <label>Назва<input id="fTitle" required maxlength="60" placeholder="Напр. Ранкова молитва"></label>
+        <label class="check-row"><input type="checkbox" id="fStar"> <span>★ Головне на сьогодні <small class="opt-note">до 3 справ</small></span></label>
         <label class="check-row"><input type="checkbox" id="fNoTime"> <span>Без прив'язки до часу</span></label>
         <div class="row2" id="fTimeRow">
           <label>Початок<input id="fStart" type="time" value="09:00"></label>
@@ -372,6 +314,7 @@
           <label><input type="radio" name="cat" value="priority"><span class="c-priority">Пріоритет</span></label>
           <label><input type="radio" name="cat" value="important"><span class="c-important">Важливо</span></label>
         </fieldset>
+        <button type="button" class="link-btn tomorrow-btn" id="tomorrowBtn" hidden>Перенести на завтра →</button>
         <div class="sheet-actions">
           <button type="button" class="btn-ghost danger" id="deleteBtn" hidden>Видалити</button>
           <button type="button" class="btn-ghost" id="cancelBtn">Скасувати</button>
@@ -423,6 +366,34 @@
           <button type="submit" class="btn btn-teal sm">Готово</button>
         </div>
       </form>
+    </div>
+
+    <!-- ========== Нижня шторка «Ще»: дані та вступ ========== -->
+    <div class="sheet-wrap" id="moreWrap" hidden>
+      <div class="sheet" role="dialog" aria-labelledby="moreTitle">
+        <span class="sheet-grip"></span>
+        <h3 id="moreTitle">Ще</h3>
+        <div class="more-list">
+          <button type="button" class="more-item" id="exportBtn">
+            <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>
+            <span><b>Зберегти копію даних</b><small>Файл з усіма справами, цілями й налаштуваннями</small></span>
+          </button>
+          <label class="more-item" for="importFile">
+            <svg viewBox="0 0 24 24"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 20h14"/></svg>
+            <span><b>Відновити з копії</b><small>Вибери файл, збережений раніше</small></span>
+            <input type="file" id="importFile" accept="application/json,.json" hidden>
+          </label>
+          <button type="button" class="more-item" id="introBtn">
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <span><b>Показати вступ</b><small>Заставка й короткий огляд застосунку</small></span>
+          </button>
+          <button type="button" class="more-item danger" id="resetBtnAll">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>
+            <span><b id="resetLabel">Почати з чистого аркуша</b><small id="resetSub">Видалити всі справи й цілі в цьому браузері</small></span>
+          </button>
+        </div>
+        <p class="more-note">Дані зберігаються лише в цьому браузері. Роби копію час від часу.</p>
+      </div>
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

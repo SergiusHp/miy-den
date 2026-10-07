@@ -3,7 +3,6 @@
    Розділи:
      1. Допоміжні функції (дати, збереження, підказки)
      2. Навігація між екранами
-     3. Ілюстрації онбордингу
      4. Планувальник «Мій день»
      5. Шторка «Нова справа»
      6. Таймер «Фокус»
@@ -132,7 +131,7 @@
 
   /* ---------------------------------------------------------------
      2. НАВІГАЦІЯ МІЖ ЕКРАНАМИ
-     Назви екранів: splash, onb1, onb2, onb3, day, focus, goals
+     Назви екранів: splash, intro, day, goals, focus
      --------------------------------------------------------------- */
   const app = $('#app');
   const screens = $$('.scr');
@@ -163,29 +162,8 @@
   document.addEventListener('click', (e) => {
     const goBtn = e.target.closest('[data-go]');
     if (goBtn) { go(goBtn.dataset.go); return; }
-    const soonBtn = e.target.closest('[data-soon]');
-    if (soonBtn) toast(`Розділ «${soonBtn.dataset.soon}» зʼявиться в наступній версії`);
+
   });
-
-  /* ---------------------------------------------------------------
-     3. ІЛЮСТРАЦІЇ ОНБОРДИНГУ (клітинки «Тиждень» і крапки «Місяць»)
-     --------------------------------------------------------------- */
-  (function buildIllustrations() {
-    // Кольори клітинок тижня: s — шавлія, t — бірюза, g — золото, p — персик, '' — порожня
-    const pattern = ['', 's', '', 't', '', '',
-                     'g', '', 't', '', 'p', '',
-                     '', 'p', '', '', 's', 'g',
-                     's', '', 'g', '', '', 't',
-                     '', 't', '', 's', '', ''];
-    const colors = { s: '#a9c4b4', t: '#7ea6a0', g: '#e7c98f', p: '#ecc1a3' };
-    $('#illuWeek').innerHTML = pattern
-      .map((c) => `<i${c ? ` style="background:${colors[c]}"` : ''}></i>`).join('');
-
-    // Крапки місяця: одна золота (сьогодні) й одна темна (важлива подія)
-    let dots = '';
-    for (let i = 0; i < 35; i++) dots += `<i${i === 11 ? ' class="gold"' : i === 24 ? ' class="dark"' : ''}></i>`;
-    $('#illuMonth').innerHTML = dots;
-  })();
 
   /* ---------------------------------------------------------------
      4. ПЛАНУВАЛЬНИК «МІЙ ДЕНЬ»
@@ -281,18 +259,42 @@
   // Список справ на обраний день
   // Картка справи. Справи без часу (start = '') і виконані — без колонки з годинами.
   // .swipe-bg — червона підкладка, яка відкривається під карткою під час свайпу ліворуч
+  const MAX_STARS = 3;             // скільки справ можна позначити «головними» на день
+  const DAY_CAPACITY_MIN = 9 * 60;  // скільки хвилин справ — це вже щільний день
+  const UNTIMED_GUESS_MIN = 30;     // скільки в середньому займає справа без часу
+
+  const toMin = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+  const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+  // Тривалість справи з часом: кінець − початок (або 30 хв, якщо кінця немає)
+  const taskMinutes = (t) => (t.start && t.end ? Math.max(0, toMin(t.end) - toMin(t.start)) : UNTIMED_GUESS_MIN);
+  const fmtHours = (min) => { const h = Math.floor(min / 60), m = min % 60; return h ? `${h} год${m ? ' ' + m + ' хв' : ''}` : `${m} хв`; };
+
+  // Яка справа розкладу йде зараз, а яка наступна (лише для сьогодні)
+  function nowNextIds(timed) {
+    if (selectedKey !== todayKey()) return {};
+    const n = nowMin();
+    const cur = timed.find((t) => toMin(t.start) <= n && n < (t.end ? toMin(t.end) : toMin(t.start) + 30));
+    if (cur) return { now: cur.id };
+    const next = timed.find((t) => toMin(t.start) > n);
+    return next ? { next: next.id } : {};
+  }
+  let nowNext = {};
+
   function taskItem(t) {
     const flagged = t.cat === 'priority' || t.cat === 'important';
     const compact = !t.start || t.done;
     // У «Виконано» час показуємо в підписі: «06:30 · 30 хв»
     const sub = t.done && t.start ? [t.start, t.sub].filter(Boolean).join(' · ') : t.sub;
-    return `<li class="task${compact ? ' anytime' : ''}${t.done ? ' done' : ''}" data-id="${t.id}" data-flip="${t.id}">
+    const badge = t.id === nowNext.now ? '<em class="now-pill">Зараз</em>' : t.id === nowNext.next ? '<em class="now-pill next">Далі</em>' : '';
+    const state = [compact ? 'anytime' : '', t.done ? 'done' : '', t.star && !t.done ? 'starred' : '',
+                   t.id === nowNext.now ? 'is-now' : ''].filter(Boolean).join(' ');
+    return `<li class="task ${state}" data-id="${t.id}" data-flip="${t.id}">
       ${compact ? '' : `<div class="task-time">${t.start}${t.end ? '<br>' + t.end : ''}</div>`}
       <span class="swipe-bg" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>Видалити
       </span>
       <div class="task-card ${t.cat}" role="button" tabindex="0" data-edit>
-        <div class="t"><b>${esc(t.title)}</b>${sub ? `<span class="${flagged && !t.done ? 'flag' : ''}">${esc(sub)}</span>` : ''}</div>
+        <div class="t"><b>${t.star && !t.done ? '<i class="star" aria-label="Головне">★</i>' : ''}${esc(t.title)}</b>${badge || sub ? `<span class="${flagged && !t.done ? 'flag' : ''}">${badge}${esc(sub || '')}</span>` : ''}</div>
         <button class="check" data-toggle aria-label="${t.done ? 'Повернути в план' : 'Позначити виконаною'}">
           <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
         </button>
@@ -302,8 +304,16 @@
 
   function renderTasks() {
     const all = tasksFor(selectedKey);
-    const anytime = all.filter((t) => !t.start && !t.done);           // без часу, у порядку додавання
+    // Без часу: спершу головні ★, далі в порядку додавання
+    const anytime = all.filter((t) => !t.start && !t.done).sort((a, b) => (b.star ? 1 : 0) - (a.star ? 1 : 0));
     const timed = all.filter((t) => t.start && !t.done);              // розклад за часом
+    nowNext = nowNextIds(timed);
+
+    // Навантаження дня: справи з часом за тривалістю + ~30 хв на кожну без часу
+    const load = timed.reduce((sum, t) => sum + taskMinutes(t), 0) + anytime.length * UNTIMED_GUESS_MIN;
+    const warn = $('#loadWarn');
+    warn.hidden = load <= DAY_CAPACITY_MIN;
+    if (!warn.hidden) warn.textContent = `День щільний: ≈ ${fmtHours(load)} справ. Перенеси щось на завтра — менше, але якісніше.`;
     // Виконано: спершу старі (без мітки часу виконання), далі — у порядку виконання; нові — внизу
     const done = all.filter((t) => t.done).sort((a, b) => (a.doneAt || 0) - (b.doneAt || 0));
     const timedTotal = all.filter((t) => t.start).length;
@@ -311,7 +321,8 @@
     $('#anytimeCount').textContent = anytime.length ? String(anytime.length) : '';
     $('#anytimeList').innerHTML = anytime.map(taskItem).join('');
 
-    $('#scheduleCount').textContent = timed.length ? String(timed.length) : '';
+    const timedLoad = timed.reduce((sum, t) => sum + taskMinutes(t), 0);
+    $('#scheduleCount').textContent = timed.length ? `${timed.length} · ≈ ${fmtHours(timedLoad)}` : '';
     $('#taskList').innerHTML = timed.length
       ? timed.map(taskItem).join('')
       : timedTotal
@@ -341,9 +352,8 @@
     const check = e.target.closest('[data-toggle]');
     if (check) {
       if (li.classList.contains('completing')) return;
-      task.done = !task.done;
-      task.doneAt = task.done ? Date.now() : null;
-      saveTasks();
+      const note = setTaskDone(task, !task.done);
+      if (note) setTimeout(() => toast(note), 500);
       if (task.done) {
         // Галочка й конфеті на місці, потім картка плавно їде в «Виконано»
         li.classList.add('done', 'completing');
@@ -507,10 +517,6 @@
   $('#prevMonth').addEventListener('click', () => { monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth() - 1, 1); renderMonth(); });
   $('#nextMonth').addEventListener('click', () => { monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 1); renderMonth(); });
 
-  $('#bellBtn').addEventListener('click', () => {
-    const left = (tasks[todayKey()] || []).filter((t) => !t.done).length;
-    toast(left ? `Сьогодні ще ${left} ${plural(left, 'справа', 'справи', 'справ')} до виконання` : 'Усі справи на сьогодні виконано');
-  });
 
   /* ---------------------------------------------------------------
      5. ШТОРКА «НОВА СПРАВА» / РЕДАГУВАННЯ
@@ -531,7 +537,9 @@
     $('#fSub').value = task ? task.sub : '';
     const cat = task ? task.cat : 'work';
     $$('input[name="cat"]').forEach((r) => { r.checked = r.value === cat; });
+    $('#fStar').checked = !!(task && task.star);
     $('#deleteBtn').hidden = !task;
+    $('#tomorrowBtn').hidden = !task || task.done;
     sheetWrap.hidden = false;
     setTimeout(() => $('#fTitle').focus(), 50);
   }
@@ -563,9 +571,13 @@
       start: noTime ? '' : $('#fStart').value,
       end: noTime ? '' : $('#fEnd').value,
       sub: $('#fSub').value.trim(),
-      cat: ($('input[name="cat"]:checked') || {}).value || 'work'
+      cat: ($('input[name="cat"]:checked') || {}).value || 'work',
+      star: $('#fStar').checked
     };
     if (!data.title) return;
+    // Головного — не більше трьох на день: інакше головним стає все
+    const starredOthers = (tasks[selectedKey] || []).filter((t) => t.star && !t.done && t.id !== editingId).length;
+    if (data.star && starredOthers >= MAX_STARS) { toast(`Головного на день — не більше ${MAX_STARS}. Зніми ★ з іншої справи`); return; }
     if (!noTime && !data.start) { toast('Вкажи час початку або познач «Без прив\'язки до часу»'); return; }
     if (data.end && data.end <= data.start) { toast('Час завершення має бути пізніше за початок'); return; }
 
@@ -580,6 +592,19 @@
     saveTasks(); closeSheet(); renderPlanner();
   });
 
+  // Перенести справу на наступний день (час зберігається)
+  $('#tomorrowBtn').addEventListener('click', () => {
+    const list = tasks[selectedKey] || [];
+    const i = list.findIndex((t) => t.id === editingId);
+    if (i === -1) return;
+    const [task] = list.splice(i, 1);
+    const next = keyOf(addDays(fromKey(selectedKey), 1));
+    task.star = false;
+    (tasks[next] || (tasks[next] = [])).push(task);
+    saveTasks(); closeSheet(); flip(dayView, renderPlanner);
+    toast('Справу перенесено на завтра');
+  });
+
   $('#deleteBtn').addEventListener('click', () => {
     tasks[selectedKey] = (tasks[selectedKey] || []).filter((t) => t.id !== editingId);
     saveTasks(); closeSheet(); renderPlanner();
@@ -592,7 +617,6 @@
   const MODES = {
     // adjustable: true — час налаштовується колом; storeKey — де запамʼятовується
     break:    { min: store.get('breakMin', 10),  cap: 'Час відпочити', focus: false, adjustable: true, storeKey: 'breakMin' },
-    short:    { min: 5,  cap: 'Коротка перерва',    focus: false },
     long:     { min: 50, cap: 'Глибока робота',     focus: true },
     custom:   { min: store.get('customMin', 30), cap: 'Фокус на важливому', focus: true, adjustable: true, storeKey: 'customMin' }
   };
@@ -682,7 +706,23 @@
       stats[todayKey()] = s;
       store.set('stats', stats);
     }
-    if (natural) { chime(); toast(MODES[timer.mode].focus ? 'Сесію завершено. Час для перерви' : 'Перерву завершено. Повертаймось до справ'); }
+    if (natural) {
+      chime();
+      // Після сесії фокусу питаємо, чи справу виконано — щоб результат одразу потрапив у план
+      const task = MODES[timer.mode].focus && (tasks[todayKey()] || []).find((t) => t.title === focusTitle && !t.done);
+      if (task) {
+        toast(`Сесію завершено. «${focusTitle}» виконано?`, {
+          label: 'Так, виконано',
+          run: () => {
+            const note = setTaskDone(task, true);
+            renderPlanner(); syncFocusChip();
+            toast(note || 'Справу позначено виконаною');
+          }
+        });
+      } else {
+        toast(MODES[timer.mode].focus ? 'Сесію завершено. Час для перерви' : 'Перерву завершено. Повертаймось до справ');
+      }
+    }
     // Після фокусу — перерва, після перерви — знову фокус
     setMode(MODES[timer.mode].focus ? 'break' : 'custom');
   }
@@ -808,7 +848,8 @@
     const list = focusCandidates();
     if (!list.includes(focusTitle)) {
       // за замовчуванням — головний пріоритет дня
-      const pr = tasksFor(todayKey()).find((t) => !t.done && t.cat === 'priority');
+      const today = tasksFor(todayKey());
+      const pr = today.find((t) => !t.done && t.star) || today.find((t) => !t.done && t.cat === 'priority');
       focusTitle = pr ? pr.title : list[0];
     }
     $('#focusTask').textContent = focusTitle;
@@ -941,6 +982,57 @@
     store.set('goalsVer', 2);
   }
 
+  // Версія 3: окремих «цілей дня» більше немає — вони стають справами в плані дня.
+  // Вкладка «День» у «Цілях» показує справи, що є кроками до цілей місяця й року.
+  if (store.get('goalsVer', 1) < 3) {
+    const CAT_FROM_SPHERE = { spirit: 'spirit', family: 'important', health: 'work', work: 'work' };
+    goals.filter((g) => g.period === 'day').forEach((g) => {
+      const list = tasks[g.key] || (tasks[g.key] = []);
+      const same = list.find((t) => t.title === g.title);
+      const done = g.current >= g.target;
+      if (same) {
+        if (!same.goalId && g.parent) same.goalId = g.parent;
+      } else {
+        list.push({ id: newId(), start: '', end: '', title: g.title,
+                    sub: g.target > 1 ? `${g.target}${g.unit ? ' ' + g.unit : ''}` : '',
+                    cat: CAT_FROM_SPHERE[g.cat] || 'work', done, doneAt: done ? 1 : null,
+                    goalId: g.parent || '', counted: done });
+      }
+    });
+    goals = goals.filter((g) => g.period !== 'day');
+    // Приклад звʼязку: «Читання Біблії» в плані — крок до цілі місяця «Послання до Римлян»
+    const romans = goals.find((g) => g.period === 'month' && g.title === 'Прочитати Послання до Римлян');
+    if (romans) Object.values(tasks).flat().forEach((t) => { if (t.title === 'Читання Біблії' && !t.goalId) t.goalId = romans.id; });
+    saveGoals(); saveTasks();
+    store.set('goalsVer', 3);
+  }
+
+  // Справа, яка є кроком до цілі, і сама ціль
+  const goalOfTask = (t) => (t && t.goalId ? goals.find((g) => g.id === t.goalId) : null);
+  const stepsOf = (dayKey) => (tasks[dayKey] || []).filter((t) => goalOfTask(t));
+
+  // Позначити справу виконаною/невиконаною. Крок до цілі додає цілі +1 (і забирає при скасуванні).
+  // Повертає текст для підказки, якщо ціль змінилась.
+  function setTaskDone(task, done) {
+    task.done = done;
+    task.doneAt = done ? Date.now() : null;
+    const g = goalOfTask(task);
+    let note = '';
+    if (g) {
+      if (done && !task.counted) {
+        g.current = Math.min(g.target, g.current + 1);
+        task.counted = true;
+        note = g.current >= g.target ? `Ціль «${g.title}» досягнуто!` : `Ціль «${g.title}»: ${g.current} з ${g.target}`;
+      } else if (!done && task.counted) {
+        g.current = Math.max(0, g.current - 1);
+        task.counted = false;
+      }
+      saveGoals();
+    }
+    saveTasks();
+    return note;
+  }
+
   // --- Стан екрана ---
   let goalPeriod = 'day';                           // обраний період (День — перша вкладка)
   let goalCursor = new Date();                      // яка саме дата/місяць/рік показується
@@ -1008,12 +1100,75 @@
 
     $('#goalPeriodLabel').textContent = goalPeriodLabel();
     $('#todayPeriodBtn').hidden = isCurrent;
+    $('#goalAddBtn').hidden = goalPeriod === 'day';      // нова ціль — лише на місяць або рік
+    $('#goalPick').innerHTML = '';
+
+    if (goalPeriod === 'day') { renderDaySteps(share); return; }
 
     renderSummary(all, share);
     renderSphereChips(all);
     renderTip(all);
     renderGoalList(all, share);
     renderCarry(share);
+  }
+
+  // --- Вкладка «День»: кроки до цілей = справи дня, повʼязані з цілями ---
+  function renderDaySteps(share) {
+    const dayKey = keyOf(goalCursor);
+    const steps = stepsOf(dayKey).sort((a, b) => a.done - b.done);
+    const done = steps.filter((t) => t.done).length;
+    const pct = steps.length ? Math.round((done / steps.length) * 100) : 0;
+
+    // Підсумок
+    $('#sumPct').textContent = pct + '%';
+    $('#sumBar').style.strokeDashoffset = SUM_RING_LEN * (1 - pct / 100);
+    $('#sumCaption').textContent = 'Кроки до цілей';
+    $('#sumCount').textContent = steps.length ? `Зроблено ${done} з ${steps.length}` : 'Кроків ще немає';
+    const a = (-90 + 360 * share) * Math.PI / 180;
+    $('#sumTimeDot').setAttribute('cx', (40 + 34 * Math.cos(a)).toFixed(2));
+    $('#sumTimeDot').setAttribute('cy', (40 + 34 * Math.sin(a)).toFixed(2));
+    $('#sumTime').textContent = share === 0 ? 'День ще попереду' : share >= 1 ? 'День завершено' : `Минуло ${Math.round(share * 100)}% дня`;
+    const pill = $('#sumPace');
+    pill.hidden = !(steps.length && done === steps.length);
+    if (!pill.hidden) { pill.className = 'pace ok'; pill.textContent = 'Усе зроблено'; }
+
+    $('#sphereChips').innerHTML = '';
+    $('#goalTip').innerHTML = '';
+    $('#carryBtn').hidden = true;
+
+    // Кроки
+    $('#goalList').innerHTML = steps.length
+      ? steps.map((t) => {
+          const g = goalOfTask(t);
+          return `<li class="goal step${t.done ? ' done' : ''}" data-task="${t.id}" style="--c:${sphereOf(g.cat).color}">
+            <div class="goal-top"><span class="goal-title"><b>${esc(t.title)}</b></span>
+              <span class="step-when">${t.start ? t.start : 'без часу'}</span></div>
+            <p class="goal-link">${t.title === g.title
+              ? `↳ Крок до цілі ${g.period === 'month' ? 'місяця' : 'року'}`
+              : `↳ Крок до: <span>${esc(g.title)}</span>`}</p>
+            <div class="goal-bottom">
+              <button class="goal-check" data-step-toggle>
+                <span class="check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+                ${t.done ? 'Зроблено' : 'Позначити зробленим'}
+              </button>
+            </div>
+          </li>`;
+        }).join('')
+      : `<li class="empty">На цей день кроків до цілей ще немає.<br>Обери ціль нижче й додай крок у план.</li>`;
+
+    // Звідки взяти крок: активні цілі місяця й року (головні — першими), без тих, що вже мають крок цього дня
+    const taken = new Set(steps.filter((t) => !t.done).map((t) => t.goalId));
+    const pool = [...goalsOf('month', goalCursor), ...goalsOf('year', goalCursor)]
+      .filter((g) => !isDone(g) && !taken.has(g.id))
+      .sort((x, y) => (y.main ? 1 : 0) - (x.main ? 1 : 0));
+    if (pool.length) {
+      $('#goalPick').innerHTML = `<div class="section-head"><b>Додати крок з цілей</b></div>
+        <ul class="pick-list">${pool.map((g) => `
+          <li style="--c:${sphereOf(g.cat).color}">
+            <span class="pick-t"><b>${g.main ? '★ ' : ''}${esc(g.title)}</b><small>${g.period === 'month' ? 'Місяць' : 'Рік'} · ${goalPct(g)}%</small></span>
+            <button type="button" class="to-plan" data-pick="${g.id}" aria-label="Додати крок до цілі в план">+ У план</button>
+          </li>`).join('')}</ul>`;
+    }
   }
 
   // Підсумок: середній прогрес + скільки часу минуло + загальний статус
@@ -1158,14 +1313,15 @@
 
   // --- Дії ---
   // Ціль → крок у плані на сьогодні
-  function addGoalToPlan(g) {
-    const k = todayKey();
-    const list = tasks[k] || (tasks[k] = []);
-    if (list.some((t) => t.goalId === g.id && !t.done)) { toast('Цей крок уже є в плані на сьогодні'); return; }
+  function addGoalToPlan(g, dayKey = todayKey()) {
+    const list = tasks[dayKey] || (tasks[dayKey] = []);
+    const d = fromKey(dayKey);
+    const when = dayKey === todayKey() ? 'на сьогодні' : `на ${d.getDate()} ${MONTHS_GEN[d.getMonth()]}`;
+    if (list.some((t) => t.goalId === g.id && !t.done)) { toast(`Цей крок уже є в плані ${when}`); return; }
     list.push({ id: newId(), start: '', end: '', title: g.title, sub: 'Крок до цілі',
                 cat: g.main ? 'priority' : 'work', done: false, goalId: g.id });
     saveTasks(); renderPlanner();
-    toast('Додано в план на сьогодні (без часу)');
+    toast(`Додано в план ${when}`);
   }
 
   // Незавершене з минулого періоду переносимо залишком (скільки ще лишилось зробити)
@@ -1184,6 +1340,17 @@
 
   // Натискання в списку цілей
   $('#goalList').addEventListener('click', (e) => {
+    // Крок до цілі (вкладка «День»): галочка = справа виконана в плані + ціль +1
+    const step = e.target.closest('[data-step-toggle]');
+    if (step) {
+      const t = (tasks[keyOf(goalCursor)] || []).find((x) => x.id === step.closest('.goal').dataset.task);
+      if (!t) return;
+      const note = setTaskDone(t, !t.done);
+      if (t.done) { burst(step.querySelector('.check'), 'joy'); haptic(12); }
+      renderGoals(); renderPlanner();
+      if (note) toast(note);
+      return;
+    }
     if (e.target.closest('[data-add]')) { openGoalSheet(); return; }
     if (e.target.closest('[data-clear-filter]')) { sphereFilter = null; renderGoals(); return; }
     if (e.target.closest('[data-toggle-done]')) { showDone = !showDone; store.set('showDoneGoals', showDone); renderGoals(); return; }
@@ -1221,6 +1388,11 @@
   });
 
   $('#carryBtn').addEventListener('click', carryOver);
+  $('#goalPick').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pick]');
+    const g = b && goals.find((x) => x.id === b.dataset.pick);
+    if (g) { addGoalToPlan(g, keyOf(goalCursor)); renderGoals(); }
+  });
 
   // Перемикач Рік / Місяць / День
   $('#goalSeg').addEventListener('click', (e) => {
@@ -1240,7 +1412,9 @@
   // Короткий підсумок за всі три періоди
   $('#goalsInfoBtn').addEventListener('click', () => {
     const now = new Date();
-    toast(`Рік: ${avgPct(goalsOf('year', now))}% · Місяць: ${avgPct(goalsOf('month', now))}% · День: ${avgPct(goalsOf('day', now))}%`);
+    const steps = stepsOf(todayKey());
+    const dayPct = steps.length ? Math.round((steps.filter((t) => t.done).length / steps.length) * 100) : 0;
+    toast(`Сьогодні: ${dayPct}% кроків · Місяць: ${avgPct(goalsOf('month', now))}% · Рік: ${avgPct(goalsOf('year', now))}%`);
   });
 
   // --- Шторка «Нова ціль» / редагування ---
@@ -1447,11 +1621,95 @@
   sphereSheetWrap.addEventListener('click', (e) => { if (e.target === sphereSheetWrap) closeSphereEditor(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sphereSheetWrap.hidden) closeSphereEditor(); });
 
+  /* --- «+» ховається, коли гортаєш список вниз, і повертається при русі вгору,
+         щоб не перекривати кнопки на нижніх картках --- */
+  $$('.day-scroll').forEach((scroller) => {
+    const fab = scroller.parentElement.querySelector('.fab');
+    if (!fab) return;
+    let lastY = 0;
+    scroller.addEventListener('scroll', () => {
+      const y = scroller.scrollTop;
+      if (Math.abs(y - lastY) < 6) return;
+      fab.classList.toggle('fab-hidden', y > lastY && y > 60);
+      lastY = y;
+    }, { passive: true });
+  });
+
   /* --- Скляні кнопки «+»: темніють під пальцем і знову прозорі після відпускання --- */
   $$('.fab').forEach((btn) => {
     const release = () => btn.classList.remove('pressed');
     btn.addEventListener('pointerdown', () => btn.classList.add('pressed'));
     ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => btn.addEventListener(ev, release));
+  });
+
+  /* ---------------------------------------------------------------
+     «ЩЕ»: копія даних, відновлення, вступ, очищення
+     Усі дані застосунку лежать у localStorage з префіксом «mydays.»
+     --------------------------------------------------------------- */
+  const moreWrap = $('#moreWrap');
+  const STORE_PREFIX = 'mydays.';
+
+  function openMore() { resetConfirm(false); moreWrap.hidden = false; }
+  function closeMore() { moreWrap.hidden = true; }
+  $('#moreBtn').addEventListener('click', openMore);
+  moreWrap.addEventListener('click', (e) => { if (e.target === moreWrap) closeMore(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !moreWrap.hidden) closeMore(); });
+
+  // Зберегти копію: усе з localStorage → файл JSON
+  $('#exportBtn').addEventListener('click', () => {
+    const data = {};
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k.startsWith(STORE_PREFIX)) data[k] = JSON.parse(localStorage.getItem(k));
+      }
+    } catch (e) { toast('Не вдалося прочитати дані браузера'); return; }
+    const blob = new Blob([JSON.stringify({ app: 'miy-den', saved: new Date().toISOString(), data }, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `miy-den-${todayKey()}.json`;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    toast('Копію збережено у файл');
+  });
+
+  // Відновити з копії: файл JSON → localStorage → перезавантаження
+  $('#importFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      if (parsed.app !== 'miy-den' || !parsed.data) throw new Error('format');
+      Object.entries(parsed.data).forEach(([k, v]) => { if (k.startsWith(STORE_PREFIX)) localStorage.setItem(k, JSON.stringify(v)); });
+      toast('Дані відновлено');
+      setTimeout(() => location.reload(), 700);
+    } catch (err) {
+      toast('Це не файл копії «Мій день». Вибери файл, збережений через «Зберегти копію даних»');
+    }
+  });
+
+  $('#introBtn').addEventListener('click', () => { closeMore(); go('splash'); });
+
+  // Очищення — з підтвердженням прямо в кнопці (друге натискання)
+  let resetArmed = false;
+  function resetConfirm(on) {
+    resetArmed = on;
+    $('#resetBtnAll').classList.toggle('confirm', on);
+    $('#resetLabel').textContent = on ? 'Точно видалити все?' : 'Почати з чистого аркуша';
+    $('#resetSub').textContent = on ? 'Натисни ще раз — це не можна скасувати' : 'Видалити всі справи й цілі в цьому браузері';
+  }
+  $('#resetBtnAll').addEventListener('click', () => {
+    if (!resetArmed) { resetConfirm(true); return; }
+    try {
+      Object.keys(localStorage).filter((k) => k.startsWith(STORE_PREFIX)).forEach((k) => localStorage.removeItem(k));
+      // Порожній старт без прикладів
+      localStorage.setItem(STORE_PREFIX + 'tasks', '{}');
+      localStorage.setItem(STORE_PREFIX + 'goals', '[]');
+      localStorage.setItem(STORE_PREFIX + 'goalsVer', '9');
+    } catch (e) { /* без збереження */ }
+    location.hash = 'day';
+    location.reload();
   });
 
   /* ---------------------------------------------------------------
@@ -1471,6 +1729,9 @@
     $('#sbTime').textContent = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
   }
   setInterval(clock, 20000);
+  setInterval(() => {
+    if (view === 'day' && selectedKey === todayKey() && !swipe && app.dataset.screen === 'day') renderTasks();
+  }, 60000);
 
   /* ---------- Старт ---------- */
   fitDevice();

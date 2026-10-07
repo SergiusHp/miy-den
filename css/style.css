@@ -123,9 +123,6 @@ img.white { filter: brightness(0) invert(1); opacity: .92; }
   padding: 0 26px calc(18px + var(--bottom));
   display: flex; flex-direction: column; align-items: center; gap: 22px;
 }
-.dots { display: flex; gap: 10px; }
-.dots i { width: 7px; height: 7px; border-radius: 50%; background: #d3ccbf; }
-.dots i.on { background: var(--teal); }
 
 /* =================================================================
    1. ЗАСТАВКА
@@ -154,61 +151,22 @@ img.white { filter: brightness(0) invert(1); opacity: .92; }
 .scr-light > .onb-text,
 .scr-light > .features { margin-inline: 26px; }
 
-.onb-head { display: flex; align-items: center; justify-content: space-between; height: 44px; margin-left: 16px !important; }
-.onb-count { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.onb-head { display: flex; align-items: center; height: 44px; margin-left: 16px !important; }
 .onb-title { margin-top: 22px; font-family: var(--f-head); font-weight: 500; font-size: 29px; line-height: 1.22; color: var(--ink); text-wrap: balance; max-width: 320px; }
 .onb-text { margin-top: 14px; font-size: 15px; line-height: 1.6; color: var(--muted); max-width: 300px; }
 
-/* Спільне для ілюстрацій */
-.illu { position: relative; flex: 1; min-height: 220px; max-height: 340px; margin: 10px 0 6px; }
-.leaf { position: absolute; width: 96px; filter: drop-shadow(0 8px 10px rgba(40, 60, 40, .18)); pointer-events: none; }
-
-/* Ілюстрація 1 — чекліст */
-.illu-cloud { position: absolute; left: 50%; top: 6%; width: 280px; height: 230px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(closest-side, #ece4d5, rgba(236, 228, 213, 0)); }
-.paper {
-  position: absolute; left: 50%; top: 50%;
-  width: 188px; padding: 24px 20px;
-  transform: translate(-46%, -50%) rotate(-7deg);
-  background: var(--paper); border: 1px solid #ede5d6; border-radius: 18px;
-  box-shadow: 0 22px 40px rgba(70, 55, 30, .16), 0 2px 0 #fff inset;
-  display: flex; flex-direction: column; gap: 18px;
-}
-.paper-row { display: flex; align-items: center; gap: 14px; }
-.lines { flex: 1; display: flex; flex-direction: column; gap: 7px; }
-.lines i { height: 7px; border-radius: 4px; background: #e4ddd0; }
-.lines i.s { width: 58%; }
-.cb { position: relative; flex: none; width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 3px 6px rgba(0,0,0,.12); }
-.cb::after { content: ""; position: absolute; left: 9px; top: 9px; width: 11px; height: 6px; border: 2.6px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg); }
-.cb-teal { background: linear-gradient(180deg, #3e7272, #2a5a5b); }
-.cb-gold { background: linear-gradient(180deg, #b89a64, #9c7f4c); }
-.cb-empty { background: #f4efe5; border: 1.5px solid #d8cfbe; box-shadow: none; }
-.cb-empty::after { display: none; }
-.illu-check .leaf-front { left: 8%; bottom: -2%; width: 104px; transform: rotate(-24deg); }
-.illu-check .leaf-back { right: 10%; top: 2%; width: 74px; transform: rotate(28deg); opacity: .55; filter: blur(.6px); }
-
-/* Ілюстрація 2 — тиждень і місяць */
-.cal-card {
-  position: absolute; padding: 14px 14px 16px;
-  background: var(--paper); border: 1px solid #ede5d6; border-radius: 16px;
-  box-shadow: 0 18px 34px rgba(70, 55, 30, .15);
-}
-.cal-card-head { display: flex; justify-content: space-between; font-family: var(--f-head); font-size: 15px; color: var(--ink); margin-bottom: 12px; }
-.cal-card-head span { color: #b9b1a2; }
-.cal-week { left: 7%; top: 4%; width: 200px; transform: rotate(-5deg); }
-.cal-month { right: 7%; bottom: 3%; width: 178px; transform: rotate(5deg); z-index: 2; }
-.week-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
-.week-grid i { aspect-ratio: 1.25; border-radius: 4px; background: #e9e3d8; }
-.month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 9px 6px; justify-items: center; }
-.month-grid i { width: 9px; height: 9px; border-radius: 50%; background: #e3dccf; }
-.month-grid i.gold { width: 14px; height: 14px; margin: -2.5px; background: #e2bd73; box-shadow: 0 0 0 3px rgba(226, 189, 115, .3); }
-.month-grid i.dark { width: 14px; height: 14px; margin: -2.5px; background: var(--teal); }
-.illu-cal .leaf-right { right: -2%; top: 8%; width: 92px; transform: rotate(22deg); }
-.illu-cal .leaf-left { left: 2%; bottom: -6%; width: 86px; transform: rotate(-32deg); z-index: 3; }
-
-/* Екран 4 — список можливостей */
+/* Екран вступу — список можливостей */
 .features { margin-top: 40px; display: flex; flex-direction: column; gap: 26px; }
 .features li { display: flex; align-items: center; gap: 18px; }
 .features img { width: 66px; height: 66px; flex: none; }
+/* Золотий кружок з прапорцем «Цілі» — у стилі іконок з набору */
+.feat-ic {
+  flex: none; width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 40% 35%, #f8e3b0, #ecc983 75%);
+  border: 1.5px solid #c9a35c; box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+}
+.feat-ic svg { width: 30px; height: 30px; fill: none; stroke: #2b2416; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.head-spacer { width: 40px; height: 40px; flex: none; }   /* тримає заголовок по центру */
 .features b { display: block; font-family: var(--f-head); font-weight: 500; font-size: 17px; color: var(--ink); }
 .features span { display: block; margin-top: 4px; font-size: 13.5px; line-height: 1.45; color: var(--muted); max-width: 210px; }
 
@@ -234,16 +192,16 @@ img.white { filter: brightness(0) invert(1); opacity: .92; }
 /* Цитата дня */
 .verse {
   position: relative; overflow: hidden;
-  padding: 16px 18px 14px; border-radius: 18px; min-height: 116px;
+  padding: 12px 16px 11px; border-radius: 16px;
   color: var(--on-dark);
   background:
     linear-gradient(90deg, rgba(16, 36, 44, .9) 0%, rgba(16, 36, 44, .55) 60%, rgba(16, 36, 44, .1) 100%),
     url("../assets/bg-splash-v.jpg") 72% 47% / 150% auto no-repeat;
   box-shadow: 0 10px 22px rgba(20, 40, 45, .18);
 }
-.verse-q { width: 18px; filter: brightness(0) invert(1); opacity: .85; }
-.verse blockquote { margin-top: 6px; font-family: var(--f-head); font-size: 14.5px; line-height: 1.45; max-width: 74%; }
-.verse figcaption { margin-top: 8px; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+.verse-q { width: 15px; filter: brightness(0) invert(1); opacity: .85; }
+.verse blockquote { margin-top: 4px; font-family: var(--f-head); font-size: 13.5px; line-height: 1.4; max-width: 78%; }
+.verse figcaption { margin-top: 5px; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
 
 /* Рядок дати і тижнева стрічка */
 .date-row { margin-top: 18px; display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 600; }
@@ -327,6 +285,23 @@ img.white { filter: brightness(0) invert(1); opacity: .92; }
 .task.anytime.done .t b { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(110, 113, 107, .6); }
 .schedule-head + .tasks { margin-top: 8px; }
 
+/* --- Головне ★, «Зараз / Далі», навантаження --- */
+.task-card .t b .star { font-style: normal; color: #c99a3f; margin-right: 5px; }
+.task.starred .task-card { box-shadow: 0 0 0 1px #e8cf97 inset, 0 2px 6px rgba(60, 50, 30, .05); }
+.now-pill {
+  display: inline-block; margin-right: 6px; padding: 1px 7px; border-radius: 8px;
+  font-style: normal; font-size: 10.5px; font-weight: 700; letter-spacing: .02em;
+  color: #fff; background: var(--teal);
+}
+.now-pill.next { color: var(--teal); background: #e3eeeb; }
+.task.is-now .task-card { box-shadow: 0 0 0 1.5px var(--teal) inset, 0 6px 14px rgba(23, 56, 62, .12); }
+.load-warn {
+  margin-top: 10px; padding: 9px 12px; border-radius: 12px;
+  background: #fbefd6; color: #7a4b0a; font-size: 12.5px; line-height: 1.45;
+}
+.tomorrow-btn { align-self: flex-start; }
+.opt-note { font-size: 11.5px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+
 /* --- Свайп ліворуч для видалення ---
    Картка і червона підкладка лежать в одній клітинці сітки; картка зверху і їде ліворуч */
 .task { position: relative; }
@@ -400,7 +375,7 @@ img.white { filter: brightness(0) invert(1); opacity: .92; }
     inset 0 1.5px 1px rgba(255, 255, 255, .9),     /* відблиск зверху */
     inset 0 -1px 2px rgba(23, 56, 62, .12),         /* тінь знизу всередині */
     0 10px 26px rgba(23, 56, 62, .18), 0 2px 6px rgba(23, 56, 62, .1);
-  transition: background .35s ease, color .35s ease, transform .35s cubic-bezier(.2, .9, .3, 1.3), box-shadow .35s ease;
+  transition: background .35s ease, color .35s ease, transform .35s cubic-bezier(.2, .9, .3, 1.3), box-shadow .35s ease, opacity .25s ease;
   -webkit-tap-highlight-color: transparent;
 }
 /* Скляний полиск */
@@ -412,6 +387,7 @@ img.white { filter: brightness(0) invert(1); opacity: .92; }
   transition: opacity .35s ease;
 }
 .fab:hover { background: rgba(255, 255, 255, .16); }
+.fab.fab-hidden { opacity: 0; transform: translateY(24px) scale(.85); pointer-events: none; }
 /* Натискання: темніє (миттєво), потім плавно повертається */
 .fab:active, .fab.pressed {
   color: #fff;
@@ -595,6 +571,20 @@ img.white { filter: brightness(0) invert(1); opacity: .92; }
 .done-head button { display: flex; align-items: center; gap: 6px; padding: 8px 2px 2px; font-size: 13px; font-weight: 700; color: var(--muted); }
 .done-head button:hover { color: var(--ink); }
 
+/* Вкладка «День»: кроки до цілей і список цілей, з яких беремо крок */
+.step-when { flex: none; padding-top: 2px; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.goal.step .goal-bottom { margin-top: 8px; }
+#goalPick .section-head { margin-top: 20px; }
+.pick-list { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.pick-list li {
+  display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 14px;
+  border-radius: 14px; background: #fffdf8; border: 1px solid #ebe3d5; border-left: 4px solid var(--c);
+}
+.pick-t { flex: 1; min-width: 0; }
+.pick-t b { display: block; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.pick-t small { display: block; margin-top: 2px; font-size: 11.5px; color: var(--muted); }
+.pick-list .to-plan { margin-left: 0; flex: none; }
+
 /* Перенесення незавершених цілей */
 .carry-btn {
   width: 100%; margin-top: 12px; min-height: 44px; padding: 10px 14px; border-radius: 12px;
@@ -687,8 +677,8 @@ img.white { filter: brightness(0) invert(1); opacity: .92; }
 
 /* Режими */
 .modes {
-  margin-top: auto; padding: 0 16px calc(22px + var(--bottom));
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  margin-top: auto; padding: 0 34px calc(22px + var(--bottom));
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
 }
 .mode { display: flex; flex-direction: column; align-items: center; gap: 3px; }
 /* Плитка — «скло» на темному фоні; активна — золота, як кнопка «Старт» */
@@ -778,6 +768,23 @@ img.white { filter: brightness(0) invert(1); opacity: .92; }
 .sheet-actions { margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 .btn-ghost { height: 44px; padding: 0 14px; border-radius: 12px; font-weight: 600; font-size: 14px; color: var(--muted); }
 .btn-ghost.danger { margin-right: auto; color: var(--c-important); }
+
+/* Шторка «Ще»: список дій */
+.more-list { display: flex; flex-direction: column; gap: 8px; }
+.more-item {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 14px;
+  border-radius: 14px; background: #fff; border: 1px solid var(--line); text-align: left;
+  transition: background .15s;
+}
+.more-item:hover { background: #f8f4ec; }
+.sheet label.more-item { flex-direction: row; gap: 12px; font-size: inherit; color: inherit; cursor: pointer; }   /* «Відновити» — це label з вибором файлу */
+.more-item svg { flex: none; width: 22px; height: 22px; fill: none; stroke: var(--teal); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.more-item b { display: block; font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.more-item small { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+.more-item.danger svg { stroke: var(--c-important); }
+.more-item.danger b { color: var(--c-important); }
+.more-item.confirm { background: var(--c-important-bg); border-color: #f0c9bf; }
+.more-note { font-size: 12px; color: var(--muted); text-align: center; }
 
 /* Сповіщення-підказка */
 .toast {
